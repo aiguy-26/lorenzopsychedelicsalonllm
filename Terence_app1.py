@@ -89,13 +89,13 @@ def ensure_directories(profile_path):
     os.makedirs(os.path.join(profile_path, 'chunks'), exist_ok=True)
 
 def chunk_text(text, chunk_size=1000, overlap=50):
-    chunks = []
+    chunk_id = []
     start = 0
     while start < len(text):
         end = min(start + chunk_size, len(text))
-        chunks.append(text[start:end])
+        chunk_id.append(text[start:end])
         start += chunk_size - overlap
-    return chunks
+    return chunk_id
 
 def verify_stored_points():
     try:
@@ -139,6 +139,8 @@ def search_similar_with_hnsw(query, top_k=8, ef=80):
         for result in results:
             metadata = result.payload.get('metadata', {})
             snippet_text = result.payload.get('text', 'No content available')
+            mp3_link = metadata.get('mp3_link', 'No mp3 link available')
+            questions = ', '.join(metadata.get('questions', [])) if metadata.get('questions') else "None"
             formatted_results.append(
                 f"Score: {result.score:.4f}\n"
                 f"Podcast Number: {metadata.get('number', 'Unknown')}\n"
@@ -147,7 +149,9 @@ def search_similar_with_hnsw(query, top_k=8, ef=80):
                 f"Speaker: {metadata.get('speaker', 'Unknown')}\n"
                 f"Chunk ID: {metadata.get('chunk_id', 'Unknown')}\n"
                 f"Topic: {metadata.get('topic', 'Unknown')}\n"
-                f"text: {snippet_text}\n"
+                f"MP3 Link: {mp3_link}\n"
+                f"Questions: {questions}\n"
+                f"Text: {snippet_text}\n"
             )
 
         return "\n\n".join(formatted_results)
