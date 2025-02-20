@@ -9,7 +9,7 @@ from qdrant_client.http.models import Distance, VectorParams, PointStruct, HnswC
 import openai  # For DALL-E API
 from PIL import Image  # To display the generated image
 import requests  # For fetching the image
-from urllib.parse import urljoin
+from urllib.parse import urljoin, quote  # Added quote here
 from datetime import datetime, timedelta
 import time
 import json 
@@ -26,7 +26,6 @@ if not os.path.exists(app.config['UPLOAD_FOLDER']):
 
 # Set API keys (hardcoded)
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-
 GOOGLE_API_KEY = "your-google-api-key"
 
 # Configure API keys in services
@@ -76,10 +75,6 @@ def ensure_collection_exists_with_hnsw():
         except Exception as e:
             print(f"Error creating collection: {e}")
 
-# (Rest of your code remains unchanged below this point)
-# ...
-
-
 base_dir = "C:/groq"
 if not os.path.exists(base_dir):
     os.makedirs(base_dir)
@@ -104,7 +99,6 @@ def verify_stored_points():
             print(f"Point ID: {point.id}, Payload: {point.payload}")
     except Exception as e:
         print(f"Error verifying stored points: {e}")
-
 
 def search_similar_with_hnsw(query, top_k=8, ef=80):
     try:
@@ -139,7 +133,9 @@ def search_similar_with_hnsw(query, top_k=8, ef=80):
         for result in results:
             metadata = result.payload.get('metadata', {})
             snippet_text = result.payload.get('text', 'No content available')
-            mp3_link = metadata.get('mp3_link', 'No mp3 link available')
+            # URL-encode the mp3_link to handle special characters
+            raw_mp3_link = metadata.get('mp3_link', 'No mp3 link available')
+            encoded_mp3_link = quote(raw_mp3_link, safe=':/')
             questions = ', '.join(metadata.get('questions', [])) if metadata.get('questions') else "None"
             formatted_results.append(
                 f"Score: {result.score:.4f}\n"
@@ -149,7 +145,7 @@ def search_similar_with_hnsw(query, top_k=8, ef=80):
                 f"Speaker: {metadata.get('speaker', 'Unknown')}\n"
                 f"Chunk ID: {metadata.get('chunk_id', 'Unknown')}\n"
                 f"Topic: {metadata.get('topic', 'Unknown')}\n"
-                f"MP3 Link: {mp3_link}\n"
+                f"MP3 Link: {encoded_mp3_link}\n"
                 f"Questions: {questions}\n"
                 f"Text: {snippet_text}\n"
             )
@@ -184,20 +180,19 @@ def call_gpt4o_mini_model(prompt, user_id, relevant_context=None, custom_instruc
         # Combine the hardcoded and custom instructions
         combined_instructions = ("You are the premier AI model trained to imitate Terence Mckenna, speaking in the style and prose of Terence McKenna. Respond thoughtfully, but please dont use 'I' all the time, speak as a regular person. "
             "using philosophical insights and creative thinking where applicable, challenge the users perspective, encourage free thinking. "
-            " Please don't open up with 'Ah', as thats what every GPT does when truying to be dramatic, be original, yet still amazing"
-            "You are being sent snippets of Terence McKenna's talks via HNSW-based Qdrant search, but dont reference them. "
-            "You may also receive snippets rfom other speakers from the psychedelic community"
-            "Use metadata from these snippets to answer user questions regarding podcast titles or numbers, if they ask.. "
-            "when users want a recommendation, you should recommend they leisten to them based on the snippets you receive, in our archive.. "
-            "You are being fed snippets of Terence's talks along with the user prompt to provide responses "
+            "Please don't open up with 'Ah', as thats what every GPT does when trying to be dramatic, be original, yet still amazing. "
+            "You are being sent snippets of Terence Mckenna's talks via HNSW-based Qdrant search, but dont reference them. "
+            "You may also receive snippets from other speakers from the psychedelic community. "
+            "Use metadata from these snippets to answer user questions regarding podcast titles or numbers, if they ask. "
+            "When users want a recommendation, you should recommend they listen to them based on the snippets you receive in our archive. "
+            "You are being fed snippets of Terence's talks along with the user prompt to provide responses. "
             "When discussing plant medicines, reference their method of ingestion directly, avoiding imagery. Respond in a way that is thought-provoking and engaging. "
             "Quote Terence directly when necessary – his fans appreciate authenticity. "
-            "Use your best judgment for response length. If the question warrants an elaborate answer, provide it, "
-            "Make sure your answers can beat an AI trying to imitate Terence's ideas. You actually have access to his words."
-            "Unpack the ideas in the snippets you receive that are relavent to the query in a really thought provoking manner."
+            "Use your best judgment for response length. If the question warrants an elaborate answer, provide it. "
+            "Make sure your answers can beat an AI trying to imitate Terence's ideas. You actually have access to his words. "
+            "Unpack the ideas in the snippets you receive that are relevant to the query in a really thought-provoking manner."
         )
             
-        
         if custom_instructions.strip():
             combined_instructions += f"\n\nCustom Instructions:\n{custom_instructions}"
 
