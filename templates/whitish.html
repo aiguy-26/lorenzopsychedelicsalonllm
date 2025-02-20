@@ -366,9 +366,28 @@
         }
       });
 
-      // Function to convert markdown links to HTML anchor tags
+      // Function to convert markdown links to HTML anchor tags.
+      // If the URL ends with .mp3, add a class for special handling.
       function markdownToHTML(text) {
-        return text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
+        return text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, function(match, p1, p2) {
+          if (p2.toLowerCase().endsWith('.mp3')) {
+            return `<a href="${p2}" class="mp3-link" target="_blank">${p1}</a>`;
+          }
+          return `<a href="${p2}" target="_blank">${p1}</a>`;
+        });
+      }
+
+      // Attach event handler for MP3 links to open audio_player.html with the source parameter.
+      function attachMP3LinkHandler() {
+        const mp3Links = document.querySelectorAll('.assistant-message a.mp3-link');
+        mp3Links.forEach(link => {
+          link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const url = this.href;
+            window.open('/audio_player?src=' + encodeURIComponent(url), 'AudioPlayer', 'width=600,height=400');
+
+          });
+        });
       }
 
       window.sendMessage = function () {
@@ -403,6 +422,8 @@
           aiMessage.innerHTML = markdownToHTML(data.response || "No response.");
           messagesContainer.appendChild(aiMessage);
           aiMessage.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          // Attach MP3 link handler to any new links in the message.
+          attachMP3LinkHandler();
         })
         .catch(() => {
           const errorMessage = document.createElement('div');

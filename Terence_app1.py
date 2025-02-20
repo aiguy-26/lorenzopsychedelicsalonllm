@@ -258,6 +258,9 @@ def get_response():
 @app.route('/about')
 def about_terence():
     return render_template('biowhitish.html')
+@app.route('/audio_player')
+def audio_player():
+    return render_template('audio_player.html')
 
 @app.route('/mp3')
 def mp3_page():

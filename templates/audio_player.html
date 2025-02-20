@@ -1,0 +1,39 @@
+<!-- audio_player.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Audio Player</title>
+  <style>
+    body { 
+      background-color: #222; 
+      color: #fff; 
+      text-align: center;
+      padding-top: 50px;
+    }
+    audio { 
+      width: 80%; 
+      max-width: 600px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Audio Player</h1>
+  <audio controls autoplay id="audioPlayer">
+    Your browser does not support the audio element.
+  </audio>
+
+  <script>
+    // Function to get query parameter by name
+    function getQueryParam(name) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(name);
+    }
+
+    const src = getQueryParam('src');
+    if (src) {
+      document.getElementById('audioPlayer').src = src;
+    }
+  </script>
+</body>
+</html>
