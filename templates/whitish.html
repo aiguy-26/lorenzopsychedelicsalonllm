@@ -177,6 +177,12 @@
       font-size: 2em;
       margin-left: 30%;
     }
+    /* Make anchor tags in assistant messages clickable and styled */
+    .assistant-message a {
+      color: blue;
+      text-decoration: underline;
+      cursor: pointer;
+    }
 
     #custom-instructions-modal {
       position: fixed;
@@ -263,7 +269,7 @@
         border: 1px solid #bebdbd;
         border-radius: 15px;
         background-color: #deefffde;
-        color: black; /* If you prefer black text in mobile input */
+        color: black;
       }
       .input-container textarea::placeholder {
         color: #a9d6f1;
@@ -318,45 +324,12 @@
 
   <!-- Custom Instructions Modal -->
   <div id="custom-instructions-modal" style="display: none;">
-    <div class="modal-content" style="
-      background-color: rgba(77,71,71,0.719);
-      padding: 25px;
-      border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-      max-width: 500px;
-      width: 600px;
-      text-align: center;
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 1000;">
+    <div class="modal-content" style="background-color: rgba(77,71,71,0.719); padding: 25px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); max-width: 500px; width: 600px; text-align: center; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1000; border: 3px solid #808582af;">
       <h2>Custom Instructions</h2>
-      <textarea id="custom-instructions-input" placeholder="Enter custom instructions here..." rows="6" style="
-        width: 500px;
-        padding: 10px;
-        margin: 15px 0;
-        border: 1px solid #98927e;
-        background-color: #a8bfd3;
-        border-radius: 8px;
-        font-size: 1em;"></textarea>
+      <textarea id="custom-instructions-input" placeholder="Enter custom instructions here..." rows="6" style="width: 500px; padding: 10px; margin: 15px 0; border: 1px solid #98927e; background-color: #a8bfd3; border-radius: 8px; font-size: 1em;"></textarea>
       <div>
-        <button onclick="saveCustomInstructions()" style="
-          padding: 10px 20px;
-          margin: 10px;
-          border: none;
-          background-color: #64d6b5;
-          color: white;
-          border-radius: 5px;
-          cursor: pointer;">Save</button>
-        <button onclick="toggleCustomInstructionsModal()" style="
-          padding: 10px 20px;
-          margin: 10px;
-          border: none;
-          background-color: #7a817d;
-          color: white;
-          border-radius: 5px;
-          cursor: pointer;">Cancel</button>
+        <button onclick="saveCustomInstructions()" style="padding: 10px 20px; margin: 10px; border: none; background-color: #64d6b5; color: white; border-radius: 5px; cursor: pointer;">Save</button>
+        <button onclick="toggleCustomInstructionsModal()" style="padding: 10px 20px; margin: 10px; border: none; background-color: #7a817d; color: white; border-radius: 5px; cursor: pointer;">Cancel</button>
       </div>
     </div>
   </div>
@@ -393,6 +366,11 @@
         }
       });
 
+      // Function to convert markdown links to HTML anchor tags
+      function markdownToHTML(text) {
+        return text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
+      }
+
       window.sendMessage = function () {
         const message = userInput.value.trim();
         if (!message) return;
@@ -419,14 +397,13 @@
         })
         .then(response => response.json())
         .then(data => {
-  const aiMessage = document.createElement('div');
-  aiMessage.className = 'assistant-message';
-  // Use innerHTML so that any HTML (like clickable links) is rendered
-  aiMessage.innerHTML = data.response || "No response.";
-  messagesContainer.appendChild(aiMessage);
-  aiMessage.scrollIntoView({ behavior: 'smooth', block: 'start' });
-})
-
+          const aiMessage = document.createElement('div');
+          aiMessage.className = 'assistant-message';
+          // Convert markdown in the response to HTML so links become clickable
+          aiMessage.innerHTML = markdownToHTML(data.response || "No response.");
+          messagesContainer.appendChild(aiMessage);
+          aiMessage.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        })
         .catch(() => {
           const errorMessage = document.createElement('div');
           errorMessage.className = 'assistant-message';
@@ -434,12 +411,12 @@
           messagesContainer.appendChild(errorMessage);
           errorMessage.scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
-      };
 
-      const savedInstructions = localStorage.getItem('customInstructions');
-      if (savedInstructions) {
-        customInstructionsText = savedInstructions;
-      }
+        const savedInstructions = localStorage.getItem('customInstructions');
+        if (savedInstructions) {
+          customInstructionsText = savedInstructions;
+        }
+      };
     });
   </script>
 </body>
