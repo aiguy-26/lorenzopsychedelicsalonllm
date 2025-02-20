@@ -264,7 +264,6 @@ def audio_player():
 
 @app.route('/mp3')
 def mp3_page():
-    # Use environment variable for JSON file path, defaulting to your original
     json_file_path = os.path.join(app.root_path, 'static', 'updated_podcast_json.json')
     try:
         with open(json_file_path, 'r', encoding='utf-8') as file:
@@ -272,6 +271,13 @@ def mp3_page():
     except Exception as e:
         print(f"Error loading JSON: {e}")
         talks = []
+
+    # Get the search query (if any)
+    query = request.args.get('q', '').strip()
+
+    # If a query is provided, filter the talks by title (case-insensitive)
+    if query:
+        talks = [talk for talk in talks if query.lower() in talk.get('title', '').lower()]
 
     def extract_podcast_number(talk):
         try:
@@ -290,7 +296,8 @@ def mp3_page():
     end = start + talks_per_page
     talks_on_page = talks[start:end]
 
-    return render_template('whitishmp3.html', talks=talks_on_page, page=page, total_pages=total_pages)
+    # Pass the query to the template so it can be shown in the search input.
+    return render_template('whitishmp3.html', talks=talks_on_page, page=page, total_pages=total_pages, query=query)
 
 if __name__ == '__main__':
     ensure_collection_exists_with_hnsw()
