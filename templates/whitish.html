@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mind of McKenna</title>
+  <style>
+    /* Basic reset and centering */
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: black;
+    }
+
+    .border-frame {
+      position: relative;
+      width: 95%;
+      height: 95%;
+      max-width: 1776px;
+      max-height: 1000px;
+      border-radius: 25px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+      margin: auto;
+      overflow: hidden;
+      background: url("/static/terencebacgroundirl.png") center center / cover no-repeat;
+    }
+
+    /* Overlay element for a semi-clear veil effect */
+    .bg-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(255,255,255,0);
+      transition: background-color 0.5s ease, backdrop-filter 0.5s ease;
+      backdrop-filter: blur(0px);
+      z-index: 0;
+    }
+    .bg-overlay.faded {
+      background-color: rgba(255,255,255,0.318); /* a subtle light veil */
+      backdrop-filter: blur(2px);
+    }
+
+    /* Chat container sits above the overlay */
+    .chat-container {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      height: 100%;
+      background-color: #7b533936;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border-radius: 20px;
+      border: 5px solid #464644e1;
+    }
+
+    .chat-header {
+      background-color: #464644e9;
+      color: #a9d6f1;
+      text-align: center;
+      padding: 4px;
+      font-size: 3.5em;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      text-shadow: 3px 3px 10px rgba(0,0,0,0.6);
+      border-radius: 15px 15px 0 0;
+    }
+
+    .nav-menu {
+      display: flex;
+      justify-content: center;
+      background-color: #464644e9;
+      padding: 10px;
+    }
+    .nav-menu a {
+      color: #a9d6f1;
+      text-decoration: none;
+      font-size: 2em;
+      padding: 10px 25px;
+      transition: background-color 0.3s ease;
+    }
+    .nav-menu a:hover {
+      background-color: #64d6b5;
+      color: #1c1b2d;
+      border-radius: 10px;
+    }
+
+    .chat-box {
+      flex-grow: 1;
+      padding: 20px;
+      overflow-y: auto;
+      border-radius: 0 0 15px 15px;
+    }
+    .chat-box::-webkit-scrollbar {
+      width: 8px;
+    }
+    .chat-box::-webkit-scrollbar-thumb {
+      background: #b5b5b5;
+      border-radius: 10px;
+    }
+    .chat-box::-webkit-scrollbar-track {
+      background: #a8bfd3;
+    }
+
+    /* Input container arranged in a row (send button inline) */
+    .input-container {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      padding: 10px 20px;
+      gap: 10px;
+      border-top: 1px solid #928e73;
+      background-color: #56565480;
+      border-radius: 0 0 15px 15px;
+    }
+    .input-container textarea {
+      flex-grow: 1;
+      padding: 15px;
+      border: 1px solid #82acd1;
+      color: white;
+      border-radius: 20px;
+      resize: none;
+      font-size: 1.4em;
+      background-color: #464644e9;
+    }
+    .input-container textarea::placeholder {
+      color: #a8bfd3c8;
+      opacity: 1;
+      font-style: italic;
+      font-size: 1.4em;
+    }
+
+    /* Send button styling remains the same */
+    .input-container button {
+      padding: 12px 30px;
+      font-size: 1.1em;
+      border-radius: 8px;
+      background-color: #9ab5cc;
+      color: black;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .input-container button:hover {
+      background-color: #64d6b5;
+    }
+
+    /* Chat bubbles */
+    .user-message {
+      background-color: #464644f8;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 15px;
+      margin: 10px 0;
+      align-self: flex-end;
+      max-width: 80%;
+      font-size: 2em;
+      margin-right: 20%;
+    }
+    .assistant-message {
+      background-color: #84a4c3f3;
+      color: black;
+      padding: 10px 15px;
+      border-radius: 15px;
+      margin: 10px 0;
+      align-self: flex-start;
+      max-width: 80%;
+      font-size: 2em;
+      margin-left: 30%;
+    }
+
+    #custom-instructions-modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #979580;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      z-index: 1000;
+      max-width: 500px;
+      border: 3px solid #808582af;
+    }
+
+    @media (max-width: 768px) {
+      html, body {
+        height: 100%;
+        overflow: hidden; /* Prevents wiggle on some mobile browsers */
+      }
+      .border-frame {
+        width: 95%;
+        height: 100vh; /* Viewport height scaling */
+        max-width: 98%;
+        max-height: 96vh;
+        margin: 0 auto;
+      }
+      .chat-header {
+        background-color: #3e3e3ccd;
+        color: rgb(169,214,241);
+        text-align: center;
+        padding: 7px;
+        font-size: 1.5em;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 3px;
+        text-shadow: 3px 3px 10px rgba(0,0,0,0.6);
+        border-radius: 15px 15px 0 0;
+      }
+      .nav-menu {
+        display: flex;
+        justify-content: center;
+        background-color:#3e3e3ccd ;
+        padding: 10px;
+      }
+      .nav-menu a {
+        color: #a9d6f1;
+        text-decoration: none;
+        font-size: 0.8em;
+        padding: 10px 25px;
+        transition: background-color 0.3s ease;
+      }
+      .nav-menu a:hover {
+        background-color: #64d6b5;
+        color: #1c1b2d;
+        border-radius: 10px;
+      }
+      .chat-container {
+        width: 98%;
+        height: 82vh; /* Adjust height proportionally */
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        border-radius: 24px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        border: 7px solid #46464497;
+      }
+
+      /* Keep input container as a row layout on mobile too */
+      .input-container {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        padding: 10px;
+        gap: 10px;
+        border-top: 1px solid #46464497;
+        background-color: #3e3e3ccd;
+        border-radius: 0 0 15px 15px;
+      }
+      .input-container textarea {
+        font-size: 1em;
+        padding: 5px;
+        border: 1px solid #bebdbd;
+        border-radius: 15px;
+        background-color: #deefffde;
+        color: black; /* If you prefer black text in mobile input */
+      }
+      .input-container textarea::placeholder {
+        color: #a9d6f1;
+        font-style: italic;
+        font-size: 1em;
+      }
+      .input-container button {
+        padding: 5px 15px;
+        font-size: 0.8em;
+        border-radius: 10px;
+        background-color: #64d6b5;
+        color: white;
+        border: none;
+        cursor: pointer;
+      }
+
+      .user-message {
+        background-color:#3e3e3ccd ;
+        font-size: 1em;
+        max-width: 70%;
+        margin-right: 20px;
+      }
+      .assistant-message {
+        background-color: #84a4c3d1;
+        font-size: 1em;
+        max-width: 70%;
+        margin-left: 65px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="border-frame" id="frame">
+    <div class="bg-overlay"></div>
+    <div class="chat-container">
+      <div class="chat-header">The Eschaton</div>
+      <nav class="nav-menu">
+        <a href="/">Home</a>
+        <a href="/about">About Terence</a>
+        <a href="/mp3">MP3 Talks</a>
+        <a href="#" onclick="toggleCustomInstructionsModal()">Settings</a>
+      </nav>
+      <div class="chat-box" id="messages"></div>
+      <!-- Input container: single row with textarea and send button -->
+      <div class="input-container">
+        <textarea id="user-input" placeholder="Welcome to the Eschaton...."></textarea>
+        <button onclick="sendMessage()">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Instructions Modal -->
+  <div id="custom-instructions-modal" style="display: none;">
+    <div class="modal-content" style="
+      background-color: rgba(77,71,71,0.719);
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      max-width: 500px;
+      width: 600px;
+      text-align: center;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1000;">
+      <h2>Custom Instructions</h2>
+      <textarea id="custom-instructions-input" placeholder="Enter custom instructions here..." rows="6" style="
+        width: 500px;
+        padding: 10px;
+        margin: 15px 0;
+        border: 1px solid #98927e;
+        background-color: #a8bfd3;
+        border-radius: 8px;
+        font-size: 1em;"></textarea>
+      <div>
+        <button onclick="saveCustomInstructions()" style="
+          padding: 10px 20px;
+          margin: 10px;
+          border: none;
+          background-color: #64d6b5;
+          color: white;
+          border-radius: 5px;
+          cursor: pointer;">Save</button>
+        <button onclick="toggleCustomInstructionsModal()" style="
+          padding: 10px 20px;
+          margin: 10px;
+          border: none;
+          background-color: #7a817d;
+          color: white;
+          border-radius: 5px;
+          cursor: pointer;">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let customInstructionsText = "";
+
+    window.toggleCustomInstructionsModal = function () {
+      const modal = document.getElementById('custom-instructions-modal');
+      const textarea = document.getElementById('custom-instructions-input');
+      textarea.value = localStorage.getItem('customInstructions') || '';
+      modal.style.display = (modal.style.display === 'none') ? 'block' : 'none';
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const messagesContainer = document.getElementById('messages');
+      const userInput = document.getElementById('user-input');
+
+      window.saveCustomInstructions = function () {
+        const instructions = document.getElementById('custom-instructions-input').value.trim();
+        if (instructions) {
+          localStorage.setItem('customInstructions', instructions);
+          customInstructionsText = instructions;
+          alert('Custom instructions saved.');
+          toggleCustomInstructionsModal();
+        }
+      };
+
+      // Press Enter to send
+      userInput.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter' && !event.shiftKey) {
+          event.preventDefault();
+          sendMessage();
+        }
+      });
+
+      window.sendMessage = function () {
+        const message = userInput.value.trim();
+        if (!message) return;
+
+        // Add the 'faded' class to the overlay for a translucent veil effect.
+        document.querySelector('.bg-overlay').classList.add('faded');
+
+        const userMessage = document.createElement('div');
+        userMessage.className = 'user-message';
+        userMessage.textContent = message;
+        messagesContainer.appendChild(userMessage);
+
+        userInput.value = '';
+
+        const formData = new FormData();
+        formData.append('user_input', message);
+        if (customInstructionsText) {
+          formData.append('custom_instructions', customInstructionsText);
+        }
+
+        fetch('/get_response', {
+          method: 'POST',
+          body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+  const aiMessage = document.createElement('div');
+  aiMessage.className = 'assistant-message';
+  // Use innerHTML so that any HTML (like clickable links) is rendered
+  aiMessage.innerHTML = data.response || "No response.";
+  messagesContainer.appendChild(aiMessage);
+  aiMessage.scrollIntoView({ behavior: 'smooth', block: 'start' });
+})
+
+        .catch(() => {
+          const errorMessage = document.createElement('div');
+          errorMessage.className = 'assistant-message';
+          errorMessage.textContent = "Server not reachable. Please check your connection.";
+          messagesContainer.appendChild(errorMessage);
+          errorMessage.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+      };
+
+      const savedInstructions = localStorage.getItem('customInstructions');
+      if (savedInstructions) {
+        customInstructionsText = savedInstructions;
+      }
+    });
+  </script>
+</body>
+</html>
