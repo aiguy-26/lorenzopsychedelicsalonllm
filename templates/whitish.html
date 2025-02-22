@@ -2,22 +2,28 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <!-- Let mobile devices scale normally -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Mind of McKenna</title>
   <style>
     /* Basic reset */
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
     html, body {
       margin: 0;
       padding: 0;
       width: 100%;
       height: 100%;
       background-color: black;
+      overflow-x: hidden;
+      font-family: sans-serif;
     }
 
-    /* Outer frame with background, now set as a column flex container */
+    /* Outer frame (desktop) */
     .border-frame {
       position: relative;
-      display: flex; /* so we can stack header on top, chat below */
+      display: flex;
       flex-direction: column;
       width: 95%;
       height: 95%;
@@ -27,18 +33,20 @@
       box-shadow: 0 8px 20px rgba(0,0,0,0.2);
       margin: auto;
       background: url("/static/terencebacgroundirl.png") center center / cover no-repeat;
-      overflow: auto; /* allow scrolling if content is bigger than 95% */
+      overflow: hidden;
       scrollbar-width: none; /* Firefox */
     }
     .border-frame::-webkit-scrollbar {
-      width: 0; /* Chrome, Safari, Opera */
+      width: 0;
       background: transparent;
     }
 
     .bg-overlay {
       position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
+      top: 0;
+      left: 0;
+      width: 100%; 
+      height: 100%;
       background-color: rgba(255,255,255,0);
       transition: background-color 0.5s ease, backdrop-filter 0.5s ease;
       backdrop-filter: blur(0px);
@@ -55,17 +63,14 @@
     .header-container {
       width: 100%;
       flex-shrink: 0;
-      position: relative;
-      z-index: 1;
-      display: flex;
-      flex-direction: column;
+      z-index: 2;
       background-color: #464644e9;
       border-bottom: 2px solid #56565480;
     }
     .chat-header {
       color: #a9d6f1;
       text-align: center;
-      font-size: 2.5em; /* slightly smaller to free space */
+      font-size: 2.5em;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 3px;
@@ -75,7 +80,6 @@
     .nav-menu {
       display: flex;
       justify-content: center;
-      
       padding: 8px 0;
     }
     .nav-menu a {
@@ -92,33 +96,31 @@
     }
 
     /****************************************/
-    /* MAIN CONTENT: SIDEBAR + CHAT         */
+    /* MAIN CONTENT (Desktop): SIDEBAR + CHAT */
     /****************************************/
     .chat-container {
       flex: 1 1 auto;
       display: flex;
       flex-direction: row;
-      position: relative;
       background-color: rgba(123,83,57,0.21);
       border: 5px solid #464644e1;
-      z-index: 1; /* above overlay */
+      z-index: 1;
+      overflow: hidden;
     }
 
-    /* Sidebar */
+    /* Sidebar (Desktop) */
     .sidebar {
-      position: relative; /* so the tab can be absolutely positioned inside */
-      width: 200px;
+      position: relative;
+      width: 195px;
       background-color: #464644e9;
       color: white;
       padding: 10px;
       border-right: 2px solid #56565480;
       display: flex;
       flex-direction: column;
-      justify-content: flex-start;
       height: 100%;
       transition: width 0.3s ease;
-      /* Allow horizontal overflow so the tab remains clickable */
-      overflow-x: visible; 
+      overflow-x: visible;
       overflow-y: auto;
       z-index: 2;
     }
@@ -127,21 +129,8 @@
       text-align: center;
       margin-bottom: 1rem;
     }
-    .sidebar ul {
-      list-style: none;
-      padding: 0;
-      flex-grow: 1; /* fill vertical space */
-    }
-    .sidebar li {
-      padding: 10px;
-      cursor: pointer;
-      border-bottom: 1px solid rgba(255,255,255,0.2);
-    }
-    .sidebar li:hover {
-      background-color: rgba(255,255,255,0.2);
-    }
     .sidebar button {
-      margin-top: 1rem;
+      margin-bottom: 1rem;
       padding: 10px 20px;
       font-size: 1em;
       border: none;
@@ -154,22 +143,31 @@
       background-color: #64d6b5;
       color: #1c1b2d;
     }
-    /* Collapse the sidebar to a minimal width so the tab remains visible */
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+      flex-grow: 1;
+    }
+    .sidebar li {
+      padding: 10px;
+      cursor: pointer;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+    }
+    .sidebar li:hover {
+      background-color: rgba(255,255,255,0.2);
+    }
     .sidebar.collapsed {
       width: 20px !important;
       padding: 0 !important;
       border: none !important;
     }
-    /* Hide sidebar content (except the tab) when collapsed */
     .sidebar.collapsed > :not(.sidebar-tab) {
       display: none;
     }
-
-    /* The tab is INSIDE the sidebar so it follows it */
     .sidebar-tab {
       position: absolute;
-      top: 120px; /* adjust as needed */
-      left: 100%; /* start on the right edge of the sidebar */
+      top: 120px;
+      left: 100%;
       transform: translateX(-100%);
       width: 20px;
       height: 60px;
@@ -183,13 +181,12 @@
       transition: 0.3s ease;
       z-index: 3;
     }
-    /* When collapsed, move the tab flush to the left edge */
     .sidebar.collapsed .sidebar-tab {
       left: 0;
       transform: translateX(0);
     }
 
-    /* Chat content (right side) */
+    /* Chat content (Desktop) */
     .chat-content {
       flex: 1 1 auto;
       display: flex;
@@ -200,10 +197,9 @@
       position: relative;
       z-index: 1;
     }
-    /* The chat-box scrolls independently so that the sidebar stays in place */
     .chat-box {
       flex-grow: 1;
-      padding: 20px;
+      padding: 20px 20px 100px 20px; /* extra bottom padding so messages don't hide */
       overflow-y: auto;
       border-radius: 0 0 15px 15px;
     }
@@ -217,34 +213,38 @@
     .chat-box::-webkit-scrollbar-track {
       background: #a8bfd3;
     }
+
+    /* Fixed Input Container (Desktop) */
     .input-container {
+      position: absolute;
+      bottom: 0;
+      left: 200px;
+      right: 0;
+      height: 50px;
       display: flex;
       flex-direction: row;
       align-items: center;
       padding: 10px 20px;
       gap: 10px;
-      border-top: 1px solid #928e73;
-      background-color: #56565480;
-      border-radius: 0 0 15px 15px;
-      flex-shrink: 0;
+      z-index: 999;
     }
     .input-container textarea {
       flex-grow: 1;
-      padding: 15px;
+      padding: 10px;
       border: 1px solid #82acd1;
       color: white;
       border-radius: 20px;
       resize: none;
-      font-size: 1.4em;
+      font-size: 1.2em;
       background-color: #464644e9;
     }
     .input-container textarea::placeholder {
       color: #a8bfd3c8;
       font-style: italic;
-      font-size: 1.4em;
+      font-size: 1.2em;
     }
     .input-container button {
-      padding: 12px 30px;
+      padding: 8px 20px;
       font-size: 1.1em;
       border-radius: 8px;
       background-color: #9ab5cc;
@@ -289,7 +289,8 @@
     /* Custom Instructions Modal */
     #custom-instructions-modal {
       position: fixed;
-      top: 50%; left: 50%;
+      top: 50%;
+      left: 50%;
       transform: translate(-50%, -50%);
       background-color: #979580;
       padding: 25px;
@@ -298,43 +299,82 @@
       z-index: 1000;
       max-width: 500px;
       border: 3px solid #808582af;
-      display: none; /* hidden by default */
+      display: none;
     }
 
-    /* Responsive tweaks */
+    /**********************/
+    /* MOBILE OVERRIDES   */
+    /**********************/
     @media (max-width: 768px) {
       .border-frame {
-        width: 95%;
+        width: 100%;
         height: 100vh;
-        max-width: 98%;
-        max-height: 96vh;
-        margin: 0 auto;
+        max-width: none;
+        max-height: none;
+        margin: 0;
+        border-radius: 0;
       }
-      .chat-header {
-        font-size: 1.5em;
-        padding: 7px;
+      /* Change layout to column so the chat sits above the input */
+      .chat-container {
+        flex-direction: column;
+        border: none;
+      }
+      /* Sidebar adjustments on mobile */
+      .sidebar {
+        width: 60px;
+        padding: 5px;
+      }
+      .sidebar h2 {
+        font-size: 1em;
+        margin-bottom: 0.5rem;
+      }
+      .sidebar button {
+        padding: 5px 10px;
+        font-size: 0.8em;
+        margin-bottom: 0.5rem;
       }
       .nav-menu a {
-        font-size: 0.8em;
-        padding: 6px 12px;
+        font-size: 1em;
+        padding: 4px 10px;
       }
-      .chat-container {
-        border: 7px solid #46464497;
+      .chat-header {
+        font-size: 1.8em;
+      }
+      /* Make chat content take remaining space */
+      .chat-content {
+        flex: 1 1 auto;
+        overflow-y: auto;
+      }
+      .chat-box {
+        padding: 10px;
+      }
+      /* Input container now becomes relative so it sits below chat */
+      .input-container {
+        position: relative;
+        left: 0;
+        right: 0;
+        width: 100%;
+        height: auto;
+        padding: 10px;
+        gap: 5px;
+        border-radius: 0;
+        background-color: #56565480;
       }
       .input-container textarea {
         font-size: 1em;
         padding: 5px;
+        min-height: 35px;
       }
       .input-container button {
-        font-size: 0.8em;
-        padding: 5px 15px;
+        font-size: 1em;
+        padding: 5px 10px;
       }
       .user-message, .assistant-message {
         font-size: 1em;
         max-width: 70%;
       }
       .sidebar-tab {
-        top: 80px;
+        top: 40px;
       }
     }
   </style>
@@ -359,21 +399,21 @@
       <!-- Sidebar with the tab INSIDE -->
       <div class="sidebar" id="sidebar">
         <h2>Chat History</h2>
-        <ul id="chat-history-list"></ul>
         <button onclick="startNewChat()">New Chat</button>
-
-        <!-- Sidebar tab that toggles collapse -->
+        <ul id="chat-history-list"></ul>
         <div class="sidebar-tab" id="sidebar-tab" onclick="toggleSidebar()">&#9776;</div>
       </div>
 
-      <!-- Right side chat panel -->
+      <!-- Chat content (only the chat messages scroll) -->
       <div class="chat-content">
         <div class="chat-box" id="messages"></div>
-        <div class="input-container">
-          <textarea id="user-input" placeholder="Welcome to the Eschaton...."></textarea>
-          <button onclick="sendMessage()">Send</button>
-        </div>
       </div>
+    </div>
+
+    <!-- Fixed Input Container (Desktop only) -->
+    <div class="input-container">
+      <textarea id="user-input" placeholder="Welcome to the Eschaton...."></textarea>
+      <button onclick="sendMessage()">Send</button>
     </div>
   </div>
 
@@ -458,7 +498,6 @@
         .then(data => {
           const messagesContainer = document.getElementById("messages");
           messagesContainer.innerHTML = "";
-
           if (data.messages && data.messages.length > 0) {
             data.messages.forEach(msg => {
               const msgDiv = document.createElement("div");
@@ -466,7 +505,7 @@
               msgDiv.innerHTML = markdownToHTML(msg.content);
               messagesContainer.appendChild(msgDiv);
             });
-            // Scroll so the top of the last message is aligned at the top of the chat box
+            // Auto-scroll to the last message (for desktop, chat-box scrollTop is set)
             if (messagesContainer.lastElementChild) {
               messagesContainer.scrollTop = messagesContainer.lastElementChild.offsetTop;
             }
@@ -486,13 +525,11 @@
       const message = document.getElementById("user-input").value.trim();
       if (!message) return;
       const messagesContainer = document.getElementById("messages");
-
       const userMessage = document.createElement("div");
       userMessage.className = "user-message";
       userMessage.textContent = message;
       messagesContainer.appendChild(userMessage);
       document.getElementById("user-input").value = "";
-
       fetch("/get_response", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -504,7 +541,6 @@
         aiMessage.className = "assistant-message";
         aiMessage.innerHTML = markdownToHTML(data.response || "No response.");
         messagesContainer.appendChild(aiMessage);
-        // Scroll so the top of the new (last) message is at the top
         if (messagesContainer.lastElementChild) {
           messagesContainer.scrollTop = messagesContainer.lastElementChild.offsetTop;
         }
@@ -521,12 +557,10 @@
       );
     }
 
-    /* Toggle the sidebar by adding/removing the .collapsed class */
     function toggleSidebar() {
       document.getElementById('sidebar').classList.toggle('collapsed');
     }
 
-    // Custom Instructions Modal
     function toggleCustomInstructionsModal() {
       const modal = document.getElementById('custom-instructions-modal');
       const textarea = document.getElementById('custom-instructions-input');

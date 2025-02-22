@@ -381,7 +381,7 @@ def mp3_page():
         print(f"Error loading JSON: {e}")
         talks = []
 
-    # handle search query
+    # handles search query
     query = request.args.get('q', '').strip()
     if query:
         talks = [t for t in talks if query.lower() in t.get('title', '').lower()]
