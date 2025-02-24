@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>About Terence McKenna – Plain Dark</title>
+  <style>
+    /* RESET & LAYOUT */
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      background: url("{{ url_for('static', filename='Stoned_ape.webp') }}") no-repeat center center fixed;
+      background-size: cover;
+      color: #ccc; /* Default text color */
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .border-frame {
+      width: 95%;
+      max-width: 1200px;
+      margin: 40px 0;
+      padding: 30px;
+      box-sizing: border-box;
+      border: 5px solid #444;       /* Dark border */
+      border-radius: 25px;
+      background-color: rgba(0, 0, 0, 0.8); /* Dark overlay behind content */
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.7);
+    }
+
+    /* HEADINGS */
+    h1, h2 {
+      text-align: center;
+      letter-spacing: 2px;
+      text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
+      margin-bottom: 20px;
+      margin-top: 30px;
+      color: #ddd;
+    }
+    h1 {
+      font-size: 3em;
+      font-weight: 900;
+    }
+    h2 {
+      font-size: 2em;
+      font-weight: 700;
+      margin-bottom: 25px;
+    }
+
+    /* CONTENT AREA */
+    .content {
+      max-width: 900px;
+      margin: 0 auto;
+      line-height: 1.7;
+      font-size: 1.1em;
+    }
+    p, li {
+      margin-bottom: 1em;
+    }
+    strong {
+      color: #fff; /* Emphasized text color */
+    }
+
+    /* IMAGES */
+    .content img {
+      width: 100%;
+      max-width: 500px;
+      display: block;
+      margin: 30px auto;
+      border-radius: 10px;
+      border: 3px solid #666;
+    }
+
+    /* QUOTES */
+    .quote {
+      font-style: italic;
+      color: #ccc;
+      padding: 20px;
+      margin: 40px 0;
+      border-left: 4px solid #888;
+      background-color: rgba(40, 40, 40, 0.8);
+      border-radius: 8px;
+    }
+
+    /* HOME BUTTON */
+    .home-btn {
+      display: inline-block;
+      margin: 20px auto;
+      padding: 12px 24px;
+      background-color: #555;
+      color: #ccc;
+      text-decoration: none;
+      border-radius: 8px;
+      font-size: 1.1em;
+      text-align: center;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+      transition: background-color 0.3s ease;
+    }
+    .home-btn:hover {
+      background-color: #777;
+      color: #fff;
+    }
+
+    /* RESPONSIVE STYLES */
+    @media (max-width: 768px) {
+      html, body {
+        height: 100%;
+        overflow-y: auto; /* Allow vertical scrolling on mobile */
+      }
+      .border-frame {
+        width: 95%;
+        margin: 20px 0;
+        border: 4px solid #444;
+        min-height: 100vh;
+      }
+      .content {
+        padding: 10px;
+        font-size: 1em;
+      }
+      h1, h2 {
+        font-size: 1.5em;
+      }
+      .quote {
+        font-size: 0.95em;
+        padding: 15px;
+      }
+      .content img {
+        max-width: 100%;
+        margin-bottom: 20px;
+      }
+      .home-btn {
+        width: 90%;
+        margin: 10px auto;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="border-frame">
+    <a href="/" class="home-btn">Home</a>
+    <h1>The Bard... About Terence McKenna</h1>
+
+    <div class="content">
+      <img src="{{ url_for('static', filename='terencepic2.jpg') }}" alt="Portrait of Terence McKenna">
+
+      <h2>Early Life</h2>
+      <p>
+        Terence Kemp McKenna was born on <strong>November 16, 1946</strong>, in the small town of <strong>Paonia, Colorado</strong>. A visionary thinker, ethnobotanist, and advocate of psychedelic exploration, McKenna spent his life unraveling the mysteries of human consciousness. His rural upbringing, surrounded by the rugged beauty of Colorado, planted the seeds of curiosity and wonder that would later define his career.
+      </p>
+
+      <h2>Childhood & Early Education</h2>
+      <p>
+        Terence McKenna grew up in the small town of <strong>Paonia, Colorado</strong>, where his curiosity about the natural world developed at an early age. His father, <strong>James McKenna</strong>, was a traveling salesman, and his mother, <strong>Madeline McKenna</strong>, was a homemaker. Although his parents were not directly involved in academia or botany, Terence was drawn to science and nature on his own, particularly through interests in <strong>fossils, butterfly collecting, and geology</strong>. These childhood fascinations laid the groundwork for his later explorations into ethnobotany and psychedelic substances.
+      </p>
+
+      <h2>Education & Early Career</h2>
+      <p>
+        Terence McKenna attended the <strong>University of California, Berkeley</strong>, where he initially studied <strong>art history</strong>. His academic journey was unconventional, reflecting his eclectic interests rather than a structured career path. McKenna’s studies eventually led him toward <strong>shamanism, anthropology, and ethnobotany</strong>, but much of his education was self-directed, occurring outside of formal institutions. After leaving Berkeley in the late 1960s, McKenna embarked on travels that would become pivotal to his life’s work.
+      </p>
+      <p>
+        In <strong>1971</strong>, Terence and his brother <strong>Dennis McKenna</strong> undertook an expedition to the <strong>Colombian Amazon</strong>, driven by a desire to explore the indigenous use of psychoactive plants. Initially seeking the hallucinogen <strong>ayahuasca</strong>, they instead encountered psilocybin-containing mushrooms in the town of <strong>La Chorrera</strong>. This experience, which Terence described as profoundly transformative, became the basis for their later work and collaborations, notably the book <em>True Hallucinations</em>.
+      </p>
+      <p>
+        During their time in the Amazon, the McKenna brothers developed new ideas on consciousness and experimented with psychoactive substances. Terence’s unique blend of <strong>scientific inquiry and mystical exploration</strong> helped shape his theories, including the famous <strong>"Stoned Ape Hypothesis"</strong>—the idea that early human evolution and the development of language were influenced by the consumption of psychedelic mushrooms.
+      </p>
+
+      <h2>Cultural Influence</h2>
+      <p>
+        Terence McKenna’s unique fusion of philosophy, science, and mysticism cemented his role as a central figure in the counterculture movement of the 1960s and 1970s, with his influence enduring far beyond. At a time of widespread social and political upheaval, McKenna’s ideas offered a compelling alternative to the mainstream narratives of materialism and reductionist science. His lectures, writings, and personal explorations resonated deeply with those seeking meaning in an increasingly mechanized and disconnected world.
+      </p>
+      <p>
+        McKenna’s work stood at the intersection of human consciousness, environmental stewardship, and the profound insights offered by natural psychoactive substances such as ayahuasca and psilocybin mushrooms. He positioned these substances not merely as tools for introspection but as vital keys to reconnecting humanity with the natural world. At a time when psychedelics were stigmatized, McKenna reframed their use as a sacred act, emphasizing their potential to dissolve cultural boundaries and foster a sense of global unity.
+      </p>
+      <p>
+        A gifted orator, McKenna had an uncanny ability to articulate complex ideas in an engaging and poetic manner, captivating audiences at conferences, festivals, and grassroots gatherings. His charismatic and often humorous style made him a beloved figure among seekers, artists, and intellectuals alike. Through his stories, he encouraged individuals to question societal norms, explore the boundaries of their own minds, and embrace alternative perspectives on reality.
+      </p>
+      <p>
+        Central to McKenna’s cultural impact was his critique of modern society’s detachment from the imagination. He argued that the loss of myth, ritual, and visionary experience had left humanity adrift in a sea of consumerism and ecological destruction. In response, McKenna called for a revival of what he termed “the archaic revival,” a return to the values of pre-industrial societies that celebrated interconnectedness, creativity, and spiritual exploration. This concept became a guiding theme in his lectures and writings, inspiring a generation to seek deeper, more sustainable relationships with both the planet and their inner worlds.
+      </p>
+      <p>
+        McKenna’s influence extended into the realms of art, music, and technology. His ideas about the imagination as humanity’s most potent tool inspired countless creators, while his early embrace of technology as a means to expand consciousness positioned him as a forward-thinker in the digital age. His discussions about the internet’s potential to democratize information and foster global consciousness were prescient, anticipating its role in reshaping human culture.
+      </p>
+      <p>
+        Ultimately, Terence McKenna’s cultural influence lies in his enduring call to explore alternative ways of thinking and living. He challenged people to question authority, embrace the unknown, and see themselves as active participants in the unfolding story of human evolution. His bold ideas continue to inspire those seeking to navigate the complexities of modern life with courage, curiosity, and creativity.
+      </p>
+
+      <img src="{{ url_for('static', filename='terencepic4.jpg') }}" alt="Terence McKenna during one of his talks">
+
+      <h2>Theories on Human Evolution</h2>
+      <p>
+        Terence McKenna was a bold thinker whose theories on human evolution challenged conventional narratives and opened new avenues for understanding the development of consciousness. Among his most notable contributions was his "Novelty Theory," a groundbreaking framework that reimagined the forces driving humanity’s progression. McKenna proposed that, rather than mere survival or utility, the evolution of human consciousness was fundamentally motivated by a drive toward novelty—an intrinsic desire for creativity, innovation, and the exploration of the unknown.
+      </p>
+      <p>
+        Central to his evolutionary ideas was the controversial "Stoned Ape Hypothesis," which speculated that early hominids who consumed psilocybin mushrooms experienced profound shifts in cognition. McKenna argued that these psychoactive experiences enhanced sensory perception, promoted abstract thinking, and catalyzed the development of language and culture. While this theory has sparked considerable debate in scientific circles, it captured the public imagination and remains a provocative lens through which to consider the intersection of biology, environment, and consciousness.
+      </p>
+
+      <h2>Psychedelics & Consciousness</h2>
+      <p>
+        Terence McKenna’s exploration of psychedelics was not merely a personal journey—it was a profound philosophical, spiritual, and scientific inquiry into the nature of reality and the mind. At the heart of his work was his conviction that substances like psilocybin mushrooms (<em>Psilocybe cubensis</em>) and ayahuasca were far more than chemical compounds; they were gateways to understanding the deepest layers of the human condition and the cosmos itself.
+      </p>
+      <p>
+        For McKenna, psychedelics were “tools of exploration,” capable of revealing hidden dimensions of consciousness. His experiences with psilocybin mushrooms, which he referred to as “the Logos,” profoundly influenced his understanding of language, thought, and the structure of reality. He believed these substances acted as catalysts for direct communication with what he described as an intelligent, otherworldly presence—entities or archetypes that reside within the psychedelic experience.
+      </p>
+      <p>
+        Ultimately, Terence McKenna’s work on psychedelics reshaped the way modern society understands consciousness, spirituality, and human potential. His eloquent descriptions of these altered states and his ability to synthesize their implications made him one of the most compelling advocates for their use in responsible, transformative ways.
+      </p>
+      <div class="quote">
+        "Psychedelics are not illegal because a loving government is concerned that you may jump out of a third-story window. Psychedelics are illegal because they dissolve opinion structures and culturally laid-down models of behavior and information processing. They open you up to the possibility that everything you know is wrong." - Terence McKenna
+      </div>
+      <div class="quote">
+        "The mushroom is an organism that wants to be eaten. It wants to be part of something greater than itself. And when it's eaten, it becomes a part of you." - Terence McKenna
+      </div>
+
+      <img src="{{ url_for('static', filename='terence5.jpg') }}" alt="Terence McKenna with a caption about 5G">
+
+      <h2>Author & Lecturer</h2>
+      <p>
+        Throughout his life, Terence wore many hats, including that of a botanist, lecturer, and prolific author. His writings spanned a wide range of topics, from the cultural significance of hallucinogens to the ecological importance of biodiversity. Some of his most notable books include <em>The Invisible Landscape</em> (co-authored with his brother Dennis McKenna) and <em>Food of the Gods</em>. Both works remain seminal texts, influencing generations of thinkers interested in the interplay of consciousness, culture, and nature.
+      </p>
+
+      <h2>Legacy & Lasting Impact</h2>
+      <p>
+        Terence McKenna's influence extends far beyond his lifetime. His ideas continue to resonate with individuals seeking a deeper understanding of consciousness, spirituality, and our place in the natural world. He remains an enduring figure in popular culture, his teachings reminding us that true knowledge lies not just in what we can see but also in the unseen realms of imagination and experience. His life's work continues to inspire those curious about the boundaries of human experience and the power of our untapped potential.
+      </p>
+
+      <h2>Closing Thoughts</h2>
+      <p>
+        As Terence once said, "We are all walking around with an invisible landscape inside us. When we open up to it, everything changes." His life's work stands as a testament to the power of curiosity, exploration, and the unending quest for knowledge.
+      </p>
+    </div>
+  </div>
+</body>
+</html>
