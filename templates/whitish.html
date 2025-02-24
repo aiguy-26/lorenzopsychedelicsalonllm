@@ -439,16 +439,17 @@
     <div class="modal-content">
       <h2>Settings</h2>
       <!-- Theme Selection Form -->
-      ><form id="theme-form" action="/set_theme" method="post">
+      <form id="theme-form" action="/set_theme" method="post">
         <label for="theme-select">Select Theme:</label>
         <select id="theme-select" name="theme">
           <option value="classic">Terence App 1 (Classic)</option>
           <option value="stoned_ape">Stoned Ape</option>
           <option value="plain_dark">Plain Dark</option>
-          <option value="plain_light">Plain Light</option>
+          <option value="plain_light" selected>Plain Light</option>
         </select>
         <button type="submit">Save Theme</button>
       </form>
+      
       
       
       <hr>
