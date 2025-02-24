@@ -192,43 +192,44 @@ def set_theme():
     return resp
 
 def get_template(template_base):
-    # Default theme is "whitish"
-    theme = request.cookies.get('theme', 'whitish')
+    # Default theme is "classic"
+    theme = request.cookies.get('theme', 'classic')
     if template_base == "index":
-        if theme == "whitish":
-            return "whitish.html"
-        elif theme == "purplish":
-            return "purplish.html"
-        elif theme == "plain_dark":
-            return "plain_dark.html"
-        elif theme == "plain_light":
-            return "plain_light.html"
+        if theme == "classic":
+            return "classic.html"
+        elif theme == "psychedelic":
+            return "psychedelic.html"
+        elif theme == "dark":
+            return "dark.html"
+        elif theme == "light":
+            return "light.html"
         else:
-            return "whitish.html"
+            return "classic.html"
     elif template_base == "about":
-        if theme == "whitish":
-            return "biowhitish.html"
-        elif theme == "purplish":
-            return "purplishbio.html"
-        elif theme == "plain_dark":
-            return "plain_darkbio.html"
-        elif theme == "plain_light":
-            return "plain_lightbio.html"
+        if theme == "classic":
+            return "classicbio.html"
+        elif theme == "psychedelic":
+            return "psychedelicbio.html"
+        elif theme == "dark":
+            return "darkbio.html"
+        elif theme == "light":
+            return "lightbio.html"
         else:
-            return "biowhitish.html"
+            return "classicbio.html"
     elif template_base == "mp3":
-        if theme == "whitish":
-            return "whitishmp3.html"
-        elif theme == "purplish":
-            return "purplishmp3.html"
-        elif theme == "plain_dark":
-            return "plain_darkmp3.html"
-        elif theme == "plain_light":
-            return "plain_lightmp3.html"
+        if theme == "classic":
+            return "classicmp3.html"
+        elif theme == "psychedelic":
+            return "psychedelicmp3.html"
+        elif theme == "dark":
+            return "darkmp3.html"
+        elif theme == "light":
+            return "lightmp3.html"
         else:
-            return "whitishmp3.html"
+            return "classicmp3.html"
     else:
         return f"{template_base}.html"
+
 
 
 
