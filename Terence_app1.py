@@ -192,19 +192,43 @@ def set_theme():
     return resp
 
 def get_template(template_base):
-    theme = request.cookies.get('theme', 'classic')
-    if template_base == "about":
-        if theme == "classic":
-            return "bioclassic.html"  # formerly whitish
-        elif theme == "stoned_ape":
-            return "stoned_ape_bio.html"  # formerly purplishbio.html
+    # Default theme is "whitish"
+    theme = request.cookies.get('theme', 'whitish')
+    if template_base == "index":
+        if theme == "whitish":
+            return "whitish.html"
+        elif theme == "purplish":
+            return "purplish.html"
+        elif theme == "plain_dark":
+            return "plain_dark.html"
+        elif theme == "plain_light":
+            return "plain_light.html"
+        else:
+            return "whitish.html"
+    elif template_base == "about":
+        if theme == "whitish":
+            return "biowhitish.html"
+        elif theme == "purplish":
+            return "purplishbio.html"
         elif theme == "plain_dark":
             return "plain_darkbio.html"
         elif theme == "plain_light":
-            return "plain_whitebio.html"
+            return "plain_lightbio.html"
         else:
-            return "bioclassic.html"
-    # ... similar for index and mp3 pages
+            return "biowhitish.html"
+    elif template_base == "mp3":
+        if theme == "whitish":
+            return "whitishmp3.html"
+        elif theme == "purplish":
+            return "purplishmp3.html"
+        elif theme == "plain_dark":
+            return "plain_darkmp3.html"
+        elif theme == "plain_light":
+            return "plain_lightmp3.html"
+        else:
+            return "whitishmp3.html"
+    else:
+        return f"{template_base}.html"
 
 
 
