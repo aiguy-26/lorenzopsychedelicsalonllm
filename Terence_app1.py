@@ -189,32 +189,32 @@ def set_theme():
 def get_template(template_base):
     theme = request.cookies.get('theme', 'whitish')
     if template_base == "index":
-        if theme == "whitish":
+        if theme == "Classy":
             return "whitish.html"
-        elif theme == "purplish":
+        elif theme == "psychedelic":
             return "purplish.html"
-        elif theme == "plain_dark":
+        elif theme == "plain dark":
             return "plain_dark.html"
-        elif theme == "plain_light":
+        elif theme == "plain light":
             return "plain_light.html"
         else:
             return "whitish.html"
     elif template_base == "about":
-        if theme == "purplish":
+        if theme == "psychedelic":
             return "purplishbio.html"
-        elif theme == "plain_dark":
-            return "plain_dark_about.html"
-        elif theme == "plain_light":
-            return "plain_light_about.html"
+        elif theme == "plain dark":
+            return "plain_darkbio.html"
+        elif theme == "plain light":
+            return "plain_lightbio.html"
         else:
             return "biowhitish.html"
     elif template_base == "mp3":
-        if theme == "purplish":
+        if theme == "psychedelic":
             return "purplishmp3.html"
-        elif theme == "plain_dark":
-            return "plain_dark_mp3.html"
-        elif theme == "plain_light":
-            return "plain_light_mp3.html"
+        elif theme == "plain dark":
+            return "plain_darkmp3.html"
+        elif theme == "plain light":
+            return "plain_lightmp3.html"
         else:
             return "whitishmp3.html"
     else:
