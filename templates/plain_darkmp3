@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Terence McKenna Talks – Plain Dark</title>
+  <style>
+    /* GLOBAL STYLES */
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      min-height: 100vh;
+      overflow-x: hidden;
+      font-family: Arial, sans-serif;
+      background: url("{{ url_for('static', filename='Stoned_ape.webp') }}") no-repeat center center fixed;
+      background-size: cover;
+      color: #ccc;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    /* CONTAINER */
+    .border-frame {
+      width: 95%;
+      max-width: 1200px;
+      margin: 40px 0;
+      padding: 30px;
+      border: 5px solid #444;
+      border-radius: 25px;
+      background-color: rgba(0, 0, 0, 0.85);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.7);
+      box-sizing: border-box;
+    }
+
+    /* HEADINGS */
+    h1, h2 {
+      text-align: center;
+      letter-spacing: 2px;
+      text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
+      color: #ddd;
+      margin-top: 30px;
+      margin-bottom: 20px;
+    }
+    h1 {
+      font-size: 3em;
+      font-weight: 900;
+    }
+    h2 {
+      font-size: 2em;
+      font-weight: 700;
+      margin-bottom: 25px;
+    }
+
+    /* NAVIGATION & CONTROLS */
+    .nav-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .home-btn {
+      display: inline-block;
+      margin: 20px 0;
+      padding: 14px 30px;
+      background-color: #555;
+      color: #ccc;
+      text-decoration: none;
+      border-radius: 10px;
+      font-size: 1.2em;
+      transition: background-color 0.3s ease;
+    }
+    .home-btn:hover {
+      background-color: #777;
+      color: #fff;
+    }
+    form {
+      margin-top: 10px;
+      text-align: center;
+    }
+    form input[type="text"] {
+      padding: 10px;
+      width: 300px;
+      border: 1px solid #444;
+      border-radius: 5px;
+      background-color: #222;
+      color: #ccc;
+    }
+    form button {
+      padding: 10px 20px;
+      margin-left: 10px;
+      border: none;
+      border-radius: 5px;
+      background-color: #84a4c3;
+      color: #fff;
+      cursor: pointer;
+    }
+    form button:hover {
+      background-color: #64d6b5;
+      color: #1c1b2d;
+    }
+    .audio-control {
+      margin-top: 10px;
+    }
+    .audio-control audio {
+      max-width: 200px;
+      border-radius: 10px;
+    }
+
+    /* TALKS CONTAINER */
+    .talks-container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: rgba(0, 0, 0, 0.5);
+      border-radius: 15px;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.7);
+    }
+    .talk {
+      margin-bottom: 20px;
+      padding: 15px;
+      border-bottom: 1px solid #444;
+    }
+    .talk h2 {
+      font-size: 1.6em;
+      color: #84a4c3;
+      margin-bottom: 10px;
+    }
+    .talk p {
+      margin: 10px 0;
+      color: #aaa;
+    }
+    .talk button {
+      margin-top: 15px;
+      padding: 12px 25px;
+      background-color: #84a4c3;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1em;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .talk button:hover {
+      background-color: #64d6b5;
+      color: #1c1b2d;
+    }
+
+    /* AUDIO */
+    audio {
+      display: block;
+      width: 100%;
+      margin-top: 30px;
+      border-radius: 10px;
+    }
+
+    /* PAGINATION */
+    .pagination {
+      text-align: center;
+      margin: 40px 0;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .pagination a {
+      color: #ccc;
+      text-decoration: none;
+      padding: 10px 20px;
+      border: 2px solid #444;
+      border-radius: 8px;
+      background-color: rgba(100, 100, 100, 0.5);
+      transition: background-color 0.3s ease;
+    }
+    .pagination a:hover {
+      background-color: #64d6b5;
+      color: #1c1b2d;
+    }
+    .pagination .current-page {
+      font-weight: bold;
+      text-decoration: underline;
+    }
+
+    /* RESPONSIVE DESIGN */
+    @media (max-width: 768px) {
+      html, body {
+        height: 100%;
+        overflow-y: auto;
+      }
+      .border-frame {
+        width: 95%;
+        margin: 20px 0;
+        border: 4px solid #444;
+        min-height: 100vh;
+      }
+      .talks-container {
+        padding: 15px;
+      }
+      .home-btn {
+        width: 90%;
+        padding: 12px;
+      }
+      .pagination a {
+        padding: 10px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+      .talk h2 {
+        font-size: 1.4em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="border-frame">
+    <div class="nav-container">
+      <a href="/" class="home-btn">Home</a>
+      <form action="/mp3" method="GET">
+        <input type="text" name="q" placeholder="Search by talk number or name..." value="{{ query|default('') }}">
+        <button type="submit">Search</button>
+      </form>
+      <div class="audio-control">
+        <audio id="audio-player" controls>
+          <source id="audio-source" src="" type="audio/mpeg">
+          Your browser does not support the audio element.
+        </audio>
+      </div>
+    </div>
+    
+    <h1>Lorenzo's Archive</h1>
+    
+    <div class="talks-container">
+      {% for talk in talks %}
+      <div class="talk">
+        <h2>{{ talk.title }}</h2>
+        <p>Podcast Number: {{ talk.title.split(' ')[1] }}</p>
+        <button onclick="openAudioInNewWindow('{{ talk.mp3_link if talk.mp3_link else talk.local_mp3_path }}')">Play</button>
+      </div>
+      {% endfor %}
+    </div>
+    
+    <div class="pagination">
+      {% if page > 1 %}
+      <a href="/mp3?page={{ page - 1 }}{% if request.args.get('q') %}&q={{ request.args.get('q') }}{% endif %}">Previous</a>
+      {% endif %}
+      
+      {% for p in range(1, total_pages + 1) %}
+      <a href="/mp3?page={{ p }}{% if request.args.get('q') %}&q={{ request.args.get('q') }}{% endif %}" class="{{ 'current-page' if p == page else '' }}">{{ p }}</a>
+      {% endfor %}
+      
+      {% if page < total_pages %}
+      <a href="/mp3?page={{ page + 1 }}{% if request.args.get('q') %}&q={{ request.args.get('q') }}{% endif %}">Next</a>
+      {% endif %}
+    </div>
+  </div>
+  
+  <script>
+    // Opens the audio player in a new window with the specified MP3 source.
+    function openAudioInNewWindow(path) {
+      window.open('/audio_player?src=' + encodeURIComponent(path), 'AudioPlayer', 'width=600,height=400');
+    }
+  </script>
+</body>
+</html>
