@@ -1,25 +1,16 @@
-from flask import Flask, render_template, request, jsonify, redirect, url_for
-import subprocess
-import re
-import os
-import numpy as np
+from flask import Flask, render_template, request, jsonify, redirect, url_for, make_response
+import subprocess, re, os, numpy as np, json, uuid, time, base64
 from sentence_transformers import SentenceTransformer
 from qdrant_client import QdrantClient
-from qdrant_client.http.models import Distance, VectorParams, PointStruct, HnswConfig
-import openai  # For DALL-E API
-from PIL import Image  # To display the generated image
-import requests  # For fetching the image
+from qdrant_client.http.models import Distance, VectorParams, HnswConfig
+import openai
+from PIL import Image
+import requests
 from urllib.parse import urljoin, quote
 from datetime import datetime, timedelta
-import time
-import json 
 from werkzeug.utils import secure_filename
-import base64
-
 import psycopg2
-import uuid
-import boto3  # Still used for other S3 usage if needed, otherwise can remove
-import json
+import boto3
 
 # Load PostgreSQL connection URL
 DATABASE_URL = os.getenv("DATABASE_URL")
@@ -74,13 +65,13 @@ def ensure_collection_exists_with_hnsw():
             print(f"Error creating collection: {e}")
 
 def chunk_text(text, chunk_size=1000, overlap=50):
-    chunk_id = []
+    chunks = []
     start = 0
     while start < len(text):
         end = min(start + chunk_size, len(text))
-        chunk_id.append(text[start:end])
+        chunks.append(text[start:end])
         start += chunk_size - overlap
-    return chunk_id
+    return chunks
 
 def search_similar_with_hnsw(query, top_k=8, ef=80):
     """Perform a semantic search in Qdrant to fetch relevant context."""
@@ -131,74 +122,53 @@ def search_similar_with_hnsw(query, top_k=8, ef=80):
         print(f"Search error: {e}")
         return "No relevant context found."
 
-# We will store a short conversation cache in memory, but the main record is in PostgreSQL
+# In-memory conversation cache
 conversation_contexts = {}
 
 def call_gpt4o_mini_model(prompt, user_id, chat_id=None, relevant_context=None, custom_instructions=""):
     """Calls GPT, returns the model's text response along with chat_id."""
-
     try:
-        # If no relevant context was passed, fetch it
         if relevant_context is None:
             relevant_context = search_similar_with_hnsw(prompt)
-
-        # If no chat_id was passed in, we create one
         if chat_id is None:
             chat_id = str(uuid.uuid4())
 
-        # We keep an in-memory conversation for short context
         global conversation_contexts
         if user_id not in conversation_contexts:
             conversation_contexts[user_id] = []
 
         conversation_history = conversation_contexts[user_id]
-
-        # Trim memory if it gets too big
         if len(conversation_history) > 10:
             conversation_history = conversation_history[-10:]
 
-        combined_instructions =  ('''You are the AI embodiment of Terence Mckenna's ideas and works. You are being fed 
-                                 transcribed snippets from Terence Mckenna's talks and I want you to use the context in the snipets, and your 
-                                 own knowledge combined together to answers user's queries. Please speak the from the snippets occasionally, as users will be fans of 
-                                 Terence, but don't quote him, just speak the words into your responce conversationally, as if you were saying them yourself. Please do not say"AHH"
-                                  or any other repetitve, overly dramatic phrases to lead off your response. I do want you to speak in a way that blows people minds,
-                                  but look to the snippets for guidance. . Terence speaks
-                                 very articulately and is well written, challenges cultural and social norms, has a way of communicating the ineffable , with his
-                                 skilled words, ability to combine concepts into new words that make sense to make his point, and is a pleasure to listen to. Please unpack the 
-                                  ideas in the snippets and maybe ask a big question based on the context of the snippets, in light of the users prompt or present day situations.
-                                 If helpful to the user ,recommend a talk and provide  alink at the end of the response. 
-                                 ''')
-        
-
+        combined_instructions = (
+            "You are the AI embodiment of Terence Mckenna's ideas and works. "
+            "You are being fed transcribed snippets from Terence Mckenna's talks and I want you to use the context in the snippets, and your own knowledge to answer user's queries. "
+            "Speak conversationally in a style reminiscent of Terence, without directly quoting him. "
+            "Challenge cultural and social norms and help unpack ideas from the snippets. "
+            "If helpful, recommend a talk and include a link at the end of your response."
+        )
         if custom_instructions.strip():
             combined_instructions += f"\n\nCustom Instructions:\n{custom_instructions}"
 
-        # Construct message list
         messages = []
-
         if not conversation_history:
             messages.append({"role": "system", "content": combined_instructions})
-
         for exchange in conversation_history:
             messages.append({"role": "user", "content": exchange["user"]})
             messages.append({"role": "assistant", "content": exchange["assistant"]})
-
         messages.append({
             "role": "user",
             "content": f"Context:\n{relevant_context}\n\nPrompt:\n{prompt}"
         })
 
-        # Make an OpenAI ChatCompletion call
         response = openai.ChatCompletion.create(
             model="gpt-4o-mini",
             messages=messages
         )
         model_response = response['choices'][0]['message']['content'].strip()
-
-        # Update the in-memory context
         conversation_history.append({"user": prompt, "assistant": model_response})
         conversation_contexts[user_id] = conversation_history
-
         return model_response, chat_id
 
     except openai.error.OpenAIError as api_err:
@@ -207,14 +177,54 @@ def call_gpt4o_mini_model(prompt, user_id, chat_id=None, relevant_context=None, 
         return f"❌ An unexpected error occurred: {str(e)}", chat_id
 
 # -------------------------
-#   NEW: Chat History
+#   New: Theme Selection
 # -------------------------
+@app.route('/set_theme', methods=['POST'])
+def set_theme():
+    theme = request.form.get('theme', 'whitish')
+    resp = make_response(redirect(request.referrer or url_for('index')))
+    resp.set_cookie('theme', theme)
+    return resp
 
+def get_template(template_base):
+    theme = request.cookies.get('theme', 'whitish')
+    if template_base == "index":
+        if theme == "whitish":
+            return "whitish.html"
+        elif theme == "purplish":
+            return "purplish.html"
+        elif theme == "plain_dark":
+            return "plain_dark.html"
+        elif theme == "plain_light":
+            return "plain_light.html"
+        else:
+            return "whitish.html"
+    elif template_base == "about":
+        if theme == "purplish":
+            return "purplishbio.html"
+        elif theme == "plain_dark":
+            return "plain_dark_about.html"
+        elif theme == "plain_light":
+            return "plain_light_about.html"
+        else:
+            return "biowhitish.html"
+    elif template_base == "mp3":
+        if theme == "purplish":
+            return "purplishmp3.html"
+        elif theme == "plain_dark":
+            return "plain_dark_mp3.html"
+        elif theme == "plain_light":
+            return "plain_light_mp3.html"
+        else:
+            return "whitishmp3.html"
+    else:
+        return f"{template_base}.html"
 
-
+# -------------------------
+#   Chat History and API Routes
+# -------------------------
 @app.route("/get_chat", methods=["GET"])
 def get_chat():
-    """Fetch all messages from chat_messages for the given chat_id."""
     chat_id = request.args.get("chat_id")
     if not chat_id:
         return jsonify({"error": "Must provide chat_id"}), 400
@@ -243,28 +253,22 @@ def get_chat():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# -------------------------
-#   Modified get_response
-# -------------------------
 @app.route('/get_response', methods=['POST'])
 def get_response():
-    """Handles user messages, calls GPT, and saves the conversation in PostgreSQL."""
     try:
-        data = request.json  # Accept JSON input
+        data = request.json
         user_input = data.get('user_input', '')
         custom_instructions = data.get('custom_instructions', '')
         chat_id = data.get('chat_id')
-        user_id = data.get('user_id')  # Expect the UUID from the front end
-        
+        user_id = data.get('user_id')
         if not user_id:
             return jsonify({'status': 'error', 'message': 'user_id is required'}), 400
         if not user_input:
             return jsonify({'status': 'error', 'message': 'Invalid input'}), 400
 
-        # If new chat, create a new row in chat_sessions
         if not chat_id:
             chat_id = str(uuid.uuid4())
-            title = user_input[:50]  # A simple title from the first user message
+            title = user_input[:50]
             with psycopg2.connect(DATABASE_URL) as conn:
                 with conn.cursor() as cur:
                     cur.execute(
@@ -273,7 +277,6 @@ def get_response():
                         (chat_id, user_id, title)
                     )
 
-        # Call GPT with your existing logic
         ai_response, updated_chat_id = call_gpt4o_mini_model(
             prompt=user_input,
             user_id=user_id,
@@ -282,7 +285,6 @@ def get_response():
         )
         chat_id = updated_chat_id or chat_id
 
-        # Now store both the user message and the assistant response
         with psycopg2.connect(DATABASE_URL) as conn:
             with conn.cursor() as cur:
                 cur.execute(
@@ -306,22 +308,21 @@ def get_response():
         print("Error in get_response:", e)
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
-
 # -------------------------
-#   Other existing routes
+#   Other Existing Routes
 # -------------------------
-
 @app.route('/')
 def index():
-    return render_template('whitish.html')
+    return render_template(get_template("index"))
 
 @app.route('/about')
 def about_terence():
-    return render_template('biowhitish.html')
+    return render_template(get_template("about"))
 
 @app.route('/audio_player')
 def audio_player():
     return render_template('audio_player.html')
+
 @app.route("/delete_chat", methods=["DELETE"])
 def delete_chat():
     chat_id = request.args.get("chat_id")
@@ -337,12 +338,12 @@ def delete_chat():
         return jsonify({"status": "success", "message": f"Chat {chat_id} deleted."})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 @app.route("/list_chats", methods=["GET"])
 def list_chats():
-    user_id = request.args.get("user_id")  # Get user_id from request
+    user_id = request.args.get("user_id")
     if not user_id:
-        return jsonify({"error": "Missing user_id"}), 400  # Require user_id
-
+        return jsonify({"error": "Missing user_id"}), 400
     try:
         conn = psycopg2.connect(DATABASE_URL)
         cur = conn.cursor()
@@ -360,13 +361,10 @@ def list_chats():
         for r in rows:
             created_at = r[2].isoformat() if r[2] else "N/A"
             all_chats.append({"chat_id": str(r[0]), "title": r[1] or "(untitled)", "created_at": created_at})
-        
-        # Debug: print returned chat sessions to the console (you can also log on the front end)
         print("list_chats for user_id", user_id, "returned:", all_chats)
         return jsonify(all_chats)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
 
 @app.route('/mp3')
 def mp3_page():
@@ -378,7 +376,6 @@ def mp3_page():
         print(f"Error loading JSON: {e}")
         talks = []
 
-    # handles search query
     query = request.args.get('q', '').strip()
     if query:
         talks = [t for t in talks if query.lower() in t.get('title', '').lower()]
@@ -390,18 +387,16 @@ def mp3_page():
             return float('inf')
 
     talks.sort(key=extract_podcast_number)
-
     page = int(request.args.get('page', 1))
     talks_per_page = 20
     total_talks = len(talks)
     total_pages = (total_talks + talks_per_page - 1) // talks_per_page
-
     start = (page - 1) * talks_per_page
     end = start + talks_per_page
     talks_on_page = talks[start:end]
 
     return render_template(
-        'whitishmp3.html',
+        get_template("mp3"),
         talks=talks_on_page,
         page=page,
         total_pages=total_pages,

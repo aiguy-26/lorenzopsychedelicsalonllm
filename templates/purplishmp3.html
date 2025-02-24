@@ -1,0 +1,238 @@
+<<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terence McKenna Talks</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      font-family: Arial, sans-serif;
+      background: url("{{ url_for('static', filename='Stoned_ape.webp') }}") no-repeat center center fixed;
+      background-size: cover;
+    }
+
+    .border-frame {
+      width: 95%;
+      max-width: 1200px;
+      border: 6px solid #1f0a65;
+      border-radius: 25px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+      margin: 40px 0;
+      background-color:#1f0a652e;
+      padding: 30px;
+      min-height: 100%;
+    }
+    
+    h1, h2 {
+      color: #6e99c5;
+      text-align: center;
+      font-size: 3em;
+      font-weight: 1000;
+      letter-spacing: 2px;
+      text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.568);
+      margin-top: 30px;
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      font-size: 2.2em;
+      font-weight: 700;
+      margin-top: 25px;
+      margin-bottom: 15px;
+    }
+
+    .talks-container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+      text-align: justify;
+      background-color: #1f0a6522;
+      border-radius: 15px;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .talk h2 {
+      margin: 0 0 15px;
+      font-size: 1.6em;
+      color: #84a4c3;
+    }
+
+    .talk p {
+      margin: 10px 0;
+      color: #557698;
+    }
+
+    .talk button {
+      margin-top: 15px;
+      padding: 12px 25px;
+      background-color: #84a4c3;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1em;
+      cursor: pointer;
+    }
+
+    .talk button:hover {
+      background-color: #64d6b5;
+      color: #1c1b2d;
+    }
+
+    audio {
+      display: block;
+      width: 100%;
+      margin-top: 30px;
+      border-radius: 10px;
+    }
+
+    .pagination {
+      text-align: center;
+      margin: 40px 0;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .pagination a {
+      color: #162533;
+      text-decoration: none;
+      padding: 10px 20px;
+      border: 2px solid #557698;
+      border-radius: 8px;
+      display: inline-block;
+      min-width: 40px;
+      text-align: center;
+      background-color: #6b96c194;
+    }
+
+    .pagination a:hover {
+      background-color: #64d6b5;
+      color: #1c1b2d;
+    }
+
+    .pagination .current-page {
+      font-weight: bold;
+      text-decoration: underline;
+    }
+
+    .home-btn {
+      display: inline-block;
+      margin: 30px 0;
+      padding: 14px 30px;
+      background-color: #84a4c3;
+      color: white;
+      text-decoration: none;
+      border-radius: 10px;
+      font-size: 1.2em;
+      text-align: center;
+    }
+
+    .home-btn:hover {
+      background-color: #64d6b5;
+      color: #1c1b2d;
+    }
+
+    /* Responsive Design for Mobile */
+    @media (max-width: 768px) {
+      html, body {
+        height: 100%;
+        overflow-y: auto;
+      }
+      .border-frame {
+        width: 95%;
+        height: auto;
+        max-width: 98%;
+        margin: 0 auto;
+        min-height: 100vh;
+      }
+      .nav-container {
+        flex-direction: column;
+      }
+      .talk {
+        padding: 20px;
+      }
+      .home-btn {
+        width: 90%;
+        padding: 12px;
+      }
+      .pagination a {
+        padding: 10px;
+      }
+      h1 {
+        font-size: 1.5em;
+      }
+      .talk h2 {
+        font-size: 1.4em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="border-frame">
+    <!-- Nav container with Home button, Search bar, and Audio control -->
+    <div class="nav-container" style="display: flex; flex-direction: column; align-items: center;">
+      <div class="top-controls" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 10px;">
+        <a href="/" class="home-btn">Home</a>
+        <form action="/mp3" method="GET" style="text-align: center;">
+          <input type="text" name="q" placeholder="Search by talk number or name..." value="{{ query|default('') }}" style="padding:10px; width:300px;">
+          <button type="submit" style="padding:10px 20px;">Search</button>
+        </form>
+        <div class="audio-control">
+          <audio id="audio-player" controls style="max-width:200px;">
+            <source id="audio-source" src="" type="audio/mpeg">
+            Your browser does not support the audio element.
+          </audio>
+        </div>
+      </div>
+    </div>
+    
+    <h1>Lorenzo's Archive</h1>
+    
+    <div class="talks-container">
+      {% for talk in talks %}
+      <div class="talk">
+        <h2>{{ talk.title }}</h2>
+        <p>Podcast Number: {{ talk.title.split(' ')[1] }}</p>
+        <!-- The play button opens the audio player page in a new window -->
+        <button onclick="openAudioInNewWindow('{{ talk.mp3_link if talk.mp3_link else talk.local_mp3_path }}')">Play</button>
+      </div>
+      {% endfor %}
+    </div>
+    
+    <!-- Pagination Controls -->
+    <div class="pagination">
+      {% if page > 1 %}
+      <a href="/mp3?page={{ page - 1 }}{% if request.args.get('q') %}&q={{ request.args.get('q') }}{% endif %}">Previous</a>
+      {% endif %}
+      
+      {% for p in range(1, total_pages + 1) %}
+      <a href="/mp3?page={{ p }}{% if request.args.get('q') %}&q={{ request.args.get('q') }}{% endif %}"
+         class="{{ 'current-page' if p == page else '' }}">
+         {{ p }}
+      </a>
+      {% endfor %}
+      
+      {% if page < total_pages %}
+      <a href="/mp3?page={{ page + 1 }}{% if request.args.get('q') %}&q={{ request.args.get('q') }}{% endif %}">Next</a>
+      {% endif %}
+    </div>
+  </div>
+  
+  <script>
+    // Function to open the audio player page with the given MP3 source in a new window.
+    function openAudioInNewWindow(path) {
+      window.open('/audio_player?src=' + encodeURIComponent(path), 'AudioPlayer', 'width=600,height=400');
+    }
+  </script>
+</body>
+</html>
