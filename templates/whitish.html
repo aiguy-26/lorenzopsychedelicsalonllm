@@ -195,7 +195,6 @@
       padding: 10px 20px;
       gap: 10px;
       z-index: 999;
-     
       border-radius: 0 0 15px 15px;
     }
     .input-container textarea {
@@ -272,22 +271,34 @@
       transition: 0.3s ease;
       z-index: 2000;
     }
-    /* CUSTOM INSTRUCTIONS MODAL (hidden by default) */
+    /* SETTINGS MODAL */
     #custom-instructions-modal {
       position: fixed;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      background-color: #979580;
+      background-color: #070706;
       padding: 25px;
       border-radius: 10px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.3);
       z-index: 1000;
       max-width: 500px;
-      border: 3px solid #808582af;
+      border: 3px solid #000000af;
       display: none;
     }
-
+    #custom-instructions-modal form,
+    #custom-instructions-modal textarea {
+      width: 100%;
+      margin-bottom: 15px;
+    }
+    #custom-instructions-modal label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 5px;
+    }
+    #custom-instructions-modal button {
+      margin-right: 10px;
+    }
     /* MOBILE OVERRIDES */
     @media (max-width: 768px) {
       .border-frame {
@@ -297,7 +308,6 @@
         border-radius: 0;
         box-shadow: none;
       }
-      /* Fix header at top */
       .header-container {
         position: fixed;
         top: 0;
@@ -319,13 +329,11 @@
         font-size: 1em;
         padding: 4px 10px;
       }
-      /* Chat container starts below header */
       .chat-container {
         flex-direction: column;
         border: none;
         margin-top: 85px;
       }
-      /* Sidebar on mobile: off-canvas drawer */
       .sidebar {
         position: fixed;
         top: 60px;
@@ -347,14 +355,12 @@
         transform: translateX(0);
         width: 125px;
       }
-      /* Chat content full width */
       .chat-content {
         margin-left: 0;
       }
       .chat-box {
         padding: 10px 10px 70px 10px;
       }
-      /* Fixed input container spans full width on mobile */
       .input-container {
         position: fixed;
         bottom: 0;
@@ -382,7 +388,6 @@
         font-size: 1em;
         max-width: 70%;
       }
-      /* Sidebar tab on mobile: fixed below header */
       .sidebar-tab {
         position: fixed;
         margin-top: 87px;
@@ -429,13 +434,29 @@
       <button onclick="sendMessage()">Send</button>
     </div>
   </div>
-  <!-- CUSTOM INSTRUCTIONS MODAL (hidden by default) -->
+  <!-- SETTINGS MODAL (hidden by default) -->
   <div id="custom-instructions-modal">
     <div class="modal-content">
+      <h2>Settings</h2>
+      <!-- Theme Selection Form -->
+      ><form id="theme-form" action="/set_theme" method="post">
+        <label for="theme-select">Select Theme:</label>
+        <select id="theme-select" name="theme">
+          <option value="classic">Terence App 1 (Classic)</option>
+          <option value="stoned_ape">Stoned Ape</option>
+          <option value="plain_dark">Plain Dark</option>
+          <option value="plain_light">Plain Light</option>
+        </select>
+        <button type="submit">Save Theme</button>
+      </form>
+      
+      
+      <hr>
+      <!-- Custom Instructions -->
       <h2>Custom Instructions</h2>
       <textarea id="custom-instructions-input" placeholder="Enter custom instructions here..." rows="6"></textarea>
       <div>
-        <button onclick="saveCustomInstructions()">Save</button>
+        <button onclick="saveCustomInstructions()">Save Instructions</button>
         <button onclick="toggleCustomInstructionsModal()">Cancel</button>
       </div>
     </div>
@@ -461,8 +482,14 @@
 
     function toggleCustomInstructionsModal() {
       const modal = document.getElementById('custom-instructions-modal');
+      // Set custom instructions
       const textarea = document.getElementById('custom-instructions-input');
       textarea.value = localStorage.getItem('customInstructions') || '';
+      // Set the theme dropdown from cookie
+      const themeCookie = document.cookie.split('; ').find(row => row.startsWith('theme='));
+      if (themeCookie) {
+        document.getElementById('theme-select').value = themeCookie.split('=')[1];
+      }
       // Toggle display between "block" and "none"
       modal.style.display = (modal.style.display === 'none' || modal.style.display === '') ? 'block' : 'none';
     }

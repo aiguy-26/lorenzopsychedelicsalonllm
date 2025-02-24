@@ -186,15 +186,15 @@ def call_gpt4o_mini_model(prompt, user_id, chat_id=None, relevant_context=None, 
 # -------------------------
 @app.route('/set_theme', methods=['POST'])
 def set_theme():
-    theme = request.form.get('theme', 'whitish')
+    theme = request.form.get('theme', 'classy')
     resp = make_response(redirect(request.referrer or url_for('index')))
     resp.set_cookie('theme', theme)
     return resp
 
 def get_template(template_base):
-    theme = request.cookies.get('theme', 'whitish')
+    theme = request.cookies.get('theme', 'classy')
     if template_base == "index":
-        if theme == "Classy":
+        if theme == "classy":
             return "whitish.html"
         elif theme == "psychedelic":
             return "purplish.html"
