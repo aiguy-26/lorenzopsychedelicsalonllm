@@ -39,7 +39,7 @@ client = QdrantClient(
     timeout=120
 )
 
-collection_name = 'Mckenna_collection2'
+collection_name = 'Salon_collection26'
 vector_size = 384  # Adjust to match model's vector output size
 
 def ensure_collection_exists_with_hnsw():
