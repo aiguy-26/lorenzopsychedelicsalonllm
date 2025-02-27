@@ -35,9 +35,9 @@
       overflow: hidden;
       scrollbar-width: none;
       background-size: 90%;  /* Change 'contain' to your preferred size option */
-      background-position: center bottom; /* Change as needed */
-      background-repeat: no-repeat;
-    }
+        background-position: center bottom; /* Change as needed */
+        background-repeat: no-repeat;
+      }
     
     .border-frame::-webkit-scrollbar {
       width: 0;
@@ -65,7 +65,7 @@
       border-bottom: 2px solid #000000ca;
     }
     .chat-header {
-      color:#82ebf3;
+      color:#64d6b5;
       text-align: center;
       font-size: 1.9em;
       font-weight: 750;
@@ -89,45 +89,19 @@
       transition: background-color 0.3s ease;
     }
     .nav-menu a:hover {
-      background-color:#82ebf3;
+      background-color: #64d6b5;
       color: #1c1b2d;
       border-radius: 10px;
     }
-    a.terence-app-link {
-      position: relative;
-    }
-    /* Custom tooltip styling */
-    a.terence-app-link:hover::after {
-      content: "Explore 300+ talks, 400+ hours of mp3, and an AI dedicated to Terence McKenna";
-      position: absolute;
-      bottom: -2.5em; /* Adjust vertical position as needed */
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0, 0, 0, 0.8);
-      color: #fff;
-      padding: 5px 10px;
-      border-radius: 5px;
-      white-space: nowrap;
-      z-index: 10;
-      font-size: 0.9em;
-    }
     /* MAIN CONTENT (DESKTOP) */
-    /* We now have two views: the chat view and the resource view */
-    #main-content {
-      flex: 1 1 auto;
-      position: relative;
-      z-index: 1;
-      overflow: hidden;
-    }
-    /* CHAT CONTAINER */
     .chat-container {
+      flex: 1 1 auto;
       display: flex;
       flex-direction: row;
       border: 5px solid #525252ea;
-      height: 100%;
+      z-index: 1;
       overflow: hidden;
       position: relative;
-      border-radius: 0 20px 20px 0;
     }
     /* SIDEBAR (DESKTOP) */
     .sidebar {
@@ -137,7 +111,7 @@
       width: 195px;
       height: 100%;
       margin-top: 1px; /* pushes sidebar down so chat messages begin below header/nav */
-      background-color:#05050583;
+      background-color:#05050583 ;
       color: white;
       padding: 10px;
       border-right: 2px solid #512b63ca;
@@ -167,7 +141,7 @@
       cursor: pointer;
     }
     .sidebar button:hover {
-      background-color: #82ebf3;
+      background-color: #64d6b5;
       color: #1c1b2d;
     }
     .sidebar ul {
@@ -190,9 +164,10 @@
       display: flex;
       flex-direction: column;
       height: 100%;
-      overflow: hidden;
       border-radius: 0 20px 20px 0;
+      overflow: hidden;
       position: relative;
+      z-index: 1;
     }
     .chat-box {
       flex-grow: 1;
@@ -251,12 +226,12 @@
       transition: background-color 0.3s ease;
     }
     .input-container button:hover {
-      background-color: #82ebf3;
+      background-color: #64d6b5;
     }
     /* CHAT BUBBLES */
     .user-message {
-      background-color: #82ebf3;
-      color: rgb(0, 0, 0);
+      background-color:#64d6b5 ;
+      color: white;
       padding: 10px 15px;
       border-radius: 15px;
       margin: 10px 0;
@@ -266,8 +241,8 @@
       margin-right: 20%;
     }
     .assistant-message {
-      background-color:#7e33dfea;
-      color: rgb(239, 237, 237);
+      background-color:#7e33dfea ;
+      color: black;
       padding: 10px 15px;
       border-radius: 15px;
       margin: 10px 0;
@@ -289,7 +264,7 @@
       width: 20px;
       height: 75px;
       margin-top: 35px;
-      background-color:#8632f3;
+      background-color:#8632f3 ;
       color: #fff;
       display: flex;
       align-items: center;
@@ -298,19 +273,6 @@
       border-radius: 0 5px 5px 0;
       transition: 0.3s ease;
       z-index: 2000;
-    }
-    /* RESOURCE CONTAINER (for the Resources view) */
-    .resource-container {
-      display: none; /* hidden by default */
-      height: 100%;
-      border: 5px solid #525252ea;
-      overflow: hidden;
-      position: relative;
-    }
-    .resource-iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
     }
     /* SETTINGS MODAL */
     #custom-instructions-modal {
@@ -388,7 +350,7 @@
         height: calc(100vh - 60px);
         margin-top:40px;
         padding: 5px;
-        background-color:#05050583;
+        background-color:#05050583 ;
         z-index: 1000;
         transition: transform 0.3s ease, width 0.3s ease;
         transform: translateX(-60px);
@@ -451,44 +413,33 @@
     <!-- HEADER -->
     <div class="header-container">
       <div class="chat-header">LORENZO'S</div>
-      <!-- The second header element's text will be updated when switching views -->
-      <div class="chat-header" id="page-title">Psychedelic Salon LLM</div>
+      <div class="chat-header">Psychedelic Salon LLM</div>
       <nav class="nav-menu">
-        <!-- Use javascript:void(0) to prevent navigation reload -->
-        <a href="javascript:void(0);" onclick="switchView('chat');">Home</a>
-        <a href="javascript:void(0);" onclick="switchView('resource');">Resources</a>
+        <a href="/">Home</a>
+        <a href="/resource">Resources</a>
         <a href="/mp3">mp3 Archives</a>
-        <!-- New Terence App link with a tooltip -->
-        <a href="https://terenceapp-production.up.railway.app" target="_blank" class="terence-app-link" title="Explore over 300 talks, 400+ hours of mp3, and an AI dedicated to Terence McKenna">Terence App</a>
         <a href="#" onclick="toggleCustomInstructionsModal()">Settings</a>
       </nav>
     </div>
-    <!-- MAIN CONTENT: Both CHAT and RESOURCE views exist in the DOM -->
-    <div id="main-content">
-      <!-- CHAT CONTAINER (default view) -->
-      <div class="chat-container" id="chat-view">
-        <!-- SIDEBAR (starts collapsed) -->
-        <div class="sidebar collapsed" id="sidebar">
-          <h2>Chat History</h2>
-          <button onclick="startNewChat()">New Chat</button>
-          <ul id="chat-history-list"></ul>
-        </div>
-        <!-- CHAT CONTENT -->
-        <div class="chat-content">
-          <div class="chat-box" id="messages"></div>
-        </div>
-        <!-- SIDEBAR TAB: Always visible inside border-frame -->
-        <div class="sidebar-tab" id="sidebar-tab" onclick="toggleSidebar()">&#9776;</div>
-        <!-- FIXED INPUT CONTAINER -->
-        <div class="input-container">
-          <textarea id="user-input" placeholder="Welcome to the Eschaton...."></textarea>
-          <button onclick="sendMessage()">Send</button>
-        </div>
+    <!-- MAIN CONTENT: SIDEBAR + CHAT -->
+    <div class="chat-container">
+      <!-- SIDEBAR (starts collapsed) -->
+      <div class="sidebar collapsed" id="sidebar">
+        <h2>Chat History</h2>
+        <button onclick="startNewChat()">New Chat</button>
+        <ul id="chat-history-list"></ul>
       </div>
-      <!-- RESOURCE CONTAINER (hidden by default) -->
-      <div class="resource-container" id="resource-view">
-        <iframe class="resource-iframe" src="resource.html" title="Resource Page"></iframe>
+      <!-- CHAT CONTENT -->
+      <div class="chat-content">
+        <div class="chat-box" id="messages"></div>
       </div>
+    </div>
+    <!-- SIDEBAR TAB: Always visible inside border-frame -->
+    <div class="sidebar-tab" id="sidebar-tab" onclick="toggleSidebar()">&#9776;</div>
+    <!-- FIXED INPUT CONTAINER -->
+    <div class="input-container">
+      <textarea id="user-input" placeholder="Welcome to the Eschaton...."></textarea>
+      <button onclick="sendMessage()">Send</button>
     </div>
   </div>
   <!-- SETTINGS MODAL (hidden by default) -->
@@ -524,19 +475,6 @@
     }
     const user_id = localStorage.getItem("user_id");
 
-    // Function to switch between chat view and resource view
-    function switchView(view) {
-      if (view === 'chat') {
-        document.getElementById('chat-view').style.display = 'flex';
-        document.getElementById('resource-view').style.display = 'none';
-        document.getElementById('page-title').textContent = 'Psychedelic Salon LLM';
-      } else if (view === 'resource') {
-        document.getElementById('chat-view').style.display = 'none';
-        document.getElementById('resource-view').style.display = 'block';
-        document.getElementById('page-title').textContent = 'Resources';
-      }
-    }
-
     function toggleSidebar() {
       const sidebar = document.getElementById('sidebar');
       if (sidebar.classList.contains('collapsed')) {
@@ -550,12 +488,15 @@
 
     function toggleCustomInstructionsModal() {
       const modal = document.getElementById('custom-instructions-modal');
+      // Set custom instructions
       const textarea = document.getElementById('custom-instructions-input');
       textarea.value = localStorage.getItem('customInstructions') || '';
+      // Set the theme dropdown from cookie
       const themeCookie = document.cookie.split('; ').find(row => row.startsWith('theme='));
       if (themeCookie) {
         document.getElementById('theme-select').value = themeCookie.split('=')[1];
       }
+      // Toggle display between "block" and "none"
       modal.style.display = (modal.style.display === 'none' || modal.style.display === '') ? 'block' : 'none';
     }
 
@@ -679,7 +620,7 @@
 
     function markdownToHTML(text) {
       return text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, p1, p2) =>
-        `<a href="${p2}" target="_blank">${p1}</a>`
+        <a href="${p2}" target="_blank">${p1}</a>
       );
     }
 
@@ -695,3 +636,7 @@
   </script>
 </body>
 </html>
+
+
+2/2
+
