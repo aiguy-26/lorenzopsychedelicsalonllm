@@ -93,6 +93,26 @@
       color: #1c1b2d;
       border-radius: 10px;
     }
+    a.terence-app-link {
+  position: relative;
+}
+
+/* Custom tooltip styling */
+a.terence-app-link:hover::after {
+  content: "Explore 300+ talks, 400+ hours of mp3, and an AI dedicated to Terence McKenna";
+  position: absolute;
+  bottom: -2.5em; /* Adjust vertical position as needed */
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 5px;
+  white-space: nowrap;
+  z-index: 10;
+  font-size: 0.9em;
+}
+
     /* MAIN CONTENT (DESKTOP) */
     .chat-container {
       flex: 1 1 auto;
@@ -415,11 +435,15 @@
       <div class="chat-header">LORENZO'S</div>
       <div class="chat-header">Psychedelic Salon LLM</div>
       <nav class="nav-menu">
-        <a href="/">Home</a>
-        <a href="/about">Resources</a>
-        <a href="/mp3">mp3 Archives</a>
-        <a href="#" onclick="toggleCustomInstructionsModal()">Settings</a>
-      </nav>
+        <nav class="nav-menu">
+          <a href="/">Home</a>
+          <a href="/resource">Resources</a>
+          <a href="/mp3">mp3 Archives</a>
+          <!-- New Terence App link with a tooltip -->
+          <a href="https://terenceapp-production.up.railway.app" target="_blank" class="terence-app-link" title="Explore over 300 talks, 400+ hours of mp3, and an AI dedicated to Terence McKenna">Terence App</a>
+          <a href="#" onclick="toggleCustomInstructionsModal()">Settings</a>
+        </nav>
+        
     </div>
     <!-- MAIN CONTENT: SIDEBAR + CHAT -->
     <div class="chat-container">
