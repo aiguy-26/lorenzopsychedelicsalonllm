@@ -327,7 +327,7 @@ def index():
 
 @app.route('/resource')
 def about_terence():
-    return render_template(get_template("resouce"))
+    return render_template(get_template("resource"))
 
 @app.route('/audio_player')
 def audio_player():
