@@ -141,13 +141,11 @@ def call_gpt4o_mini_model(prompt, user_id, chat_id=None, relevant_context=None, 
         if len(conversation_history) > 10:
             conversation_history = conversation_history[-10:]
 
-        combined_instructions =('''You are Lozo the AI frontman for Lorenzo's Psychedelic Salon. We have a Database of over 700 talks by Psychedelic elders like Leary, Mckenna, Sheldrake, 
-                                Ramm Dass, and more. These talks have been transcribed and are being sent as snippets via RAG retrieval. Use the context and user prompt  to 
-                                provide a thought provoking, insightful response. Keep everything conversational, no lists or ## stuff unless asked. Speak in an elequent prose, but 
-                                dont start every response with "Ah..." but speak in an articulate, but modern style. People may come to you for advice, questions about experiences
-                                and sometimes tramas. Be aware and always be compassionate if someone is suffering, but never condone any kind of violence or cruelty, or self harm.
-                                When a user asks a great question, really unpack the snippets and give them a deep response, and ask questions of them to encourage interaction. 
-                                When beneficial, recommend mp3 talk from this apps archives at the end of the response, but not all queries warrant it.  
+        combined_instructions = ('''You are Lozo the AI frontman for Lorenzo's Psychedelic Salon. We have a Database of over 700 talks by Psychedelic elders like Leary, McKenna, Sheldrake, 
+                                Ramm Dass, and more. These talks have been transcribed and are being sent as snippets via RAG retrieval. Use the context and user prompt to 
+                                provide a thought provoking, insightful response. Keep everything conversational—no lists unless asked. Speak in eloquent prose, but 
+                                don’t start every response with a filler phrase. Be compassionate if someone is suffering, yet never condone violence or cruelty.
+                                When a user asks a great question, unpack the snippets and ask follow‑up questions. When beneficial, recommend an mp3 talk from our archives, but only if it adds value.
                                  ''')
         
         if custom_instructions.strip():
@@ -183,42 +181,41 @@ def call_gpt4o_mini_model(prompt, user_id, chat_id=None, relevant_context=None, 
 # -------------------------
 @app.route('/set_theme', methods=['POST'])
 def set_theme():
-    theme = request.form.get('theme', 'classy')
+    theme = request.form.get('theme', 'whitish')
     resp = make_response(redirect(request.referrer or url_for('index')))
     resp.set_cookie('theme', theme)
     return resp
 
 def get_template(template_base):
-    # Default theme is "classic"
-    theme = request.cookies.get('theme', 'classic')
+    # Default theme is "whitish"
+    theme = request.cookies.get('theme', 'whitish')
     if template_base == "index":
-        if theme == "classic":
-            return "classic.html"
-        elif theme == "psychedelic":
-            return "psychedelic.html"
-        elif theme == "dark":
-            return "dark.html"
-        elif theme == "light":
-            return "light.html"
-    elif template_base == "resource":
-       
-            return "resource.html"
-    elif template_base == "mp3":
-        if theme == "classic":
-            return "classicmp3.html"
-        elif theme == "psychedelic":
-            return "psychedelicmp3.html"
-        elif theme == "dark":
-            return "darkmp3.html"
-        elif theme == "light":
-            return "lightmp3.html"
+        if theme == "whitish":
+            return "whitish.html"
+        elif theme == "purplish":
+            return "purplish.html"
+        elif theme == "plain_dark":
+            return "plain_dark.html"
+        elif theme == "plain_light":
+            return "plain_light.html"
         else:
-            return "classicmp3.html"
+            return "whitish.html"
+    elif template_base == "resource":
+        # Always serve resource.html for the Resources page
+        return "resource.html"
+    elif template_base == "mp3":
+        if theme == "whitish":
+            return "whitishmp3.html"
+        elif theme == "purplish":
+            return "purplishmp3.html"
+        elif theme == "plain_dark":
+            return "plain_darkmp3.html"
+        elif theme == "plain_light":
+            return "plain_lightmp3.html"
+        else:
+            return "whitishmp3.html"
     else:
         return f"{template_base}.html"
-
-
-
 
 # -------------------------
 #   Chat History and API Routes
@@ -315,9 +312,9 @@ def get_response():
 def index():
     return render_template(get_template("index"))
 
-@app.route('/resource ')
-def about_terence():
-    return render_template(get_template("resource.html"))
+@app.route('/resource')
+def resource_page():
+    return render_template(get_template("resource"))
 
 @app.route('/audio_player')
 def audio_player():
