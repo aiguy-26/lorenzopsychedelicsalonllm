@@ -318,9 +318,7 @@ def get_response():
 def index():
     return render_template(get_template("index"))
 
-@app.route('/resource')
-def resource_page():
-    return render_template(get_template("resource"))
+
 
 @app.route('/audio_player')
 def audio_player():
