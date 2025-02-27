@@ -21,7 +21,7 @@
     }
     /* OUTER FRAME */
     .border-frame {
-      position: relative;
+      position: relative; /* for absolute positioning inside */
       display: flex;
       flex-direction: column;
       width: 95%;
@@ -484,7 +484,7 @@
       }
     }
 
-    // Switch between chat and resource views
+    // Switch between chat view and resource view
     function switchView(view) {
       if (view === 'chat') {
         document.getElementById('chat-view').style.display = 'flex';
@@ -502,6 +502,7 @@
       const modal = document.getElementById('custom-instructions-modal');
       const textarea = document.getElementById('custom-instructions-input');
       textarea.value = localStorage.getItem('customInstructions') || '';
+      // Set theme dropdown from cookie
       const themeCookie = document.cookie.split('; ').find(row => row.startsWith('theme='));
       if (themeCookie) {
         document.getElementById('theme-select').value = themeCookie.split('=')[1];
