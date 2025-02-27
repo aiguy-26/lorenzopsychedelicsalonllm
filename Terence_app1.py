@@ -201,13 +201,7 @@ def get_template(template_base):
         elif theme == "light":
             return "light.html"
     elif template_base == "about":
-        if theme == "purplish":
-            return "purplishbio.html"
-        elif theme == "plain_dark":
-            return "plain_dark_about.html"
-        elif theme == "plain_light":
-            return "plain_light_about.html"
-        else:
+       
             return "resource.html"
     elif template_base == "mp3":
         if theme == "classic":
