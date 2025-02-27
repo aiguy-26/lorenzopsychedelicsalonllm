@@ -324,12 +324,12 @@
     @media (max-width: 768px) {
   .border-frame {
     width: 100%;
-    height: calc(100vh - 80px); /* Subtract header height */
-    margin-bottom: 60px;
+    height: 100vh;
+    margin: 0;
     border-radius: 0;
     box-shadow: none;
-    background-size: cover;
-    background-position: center 80px; /* Push image down 80px so header doesn't cover it */
+    background-size: 92% auto;
+    background-position: center bottom;
     background-repeat: no-repeat;
   }
   .header-container {
@@ -340,14 +340,14 @@
     height: 80px;
     padding: 5px 0;
     z-index: 3000;
-    /* Remove margin-top to keep header flush at top */
+    /* Removed margin-top so the header is flush at the top */
   }
   .chat-header {
     font-size: 1.2em;
     padding: 2px 0;
   }
   .nav-menu {
-    background-color: #000000;
+    background-color: #464644e9;
     padding: 4px 0;
   }
   .nav-menu a {
@@ -367,7 +367,7 @@
     height: calc(100vh - 60px);
     margin-top: 40px;
     padding: 5px;
-    background-color: #05050583;
+    background-color: #464644e9;
     z-index: 1000;
     transition: transform 0.3s ease, width 0.3s ease;
     transform: translateX(-60px);
@@ -384,7 +384,7 @@
     margin-left: 0;
   }
   .chat-box {
-    padding: 10px 10px 70px 10px;
+    padding: 10px 10px 120px 10px;
   }
   .input-container {
     position: fixed;
@@ -418,10 +418,11 @@
     margin-top: 87px;
     left: 0;
     width: 20px;
-    height: 60px;
+    height: 75px;
     z-index: 2000;
   }
 }
+
 
   </style>
 </head>
