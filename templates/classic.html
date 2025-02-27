@@ -21,7 +21,7 @@
     }
     /* OUTER FRAME */
     .border-frame {
-      position: relative; /* for absolute positioning inside */
+      position: relative;
       display: flex;
       flex-direction: column;
       width: 95%;
@@ -34,11 +34,10 @@
       background: url("/static/salonpic3.png") center center / cover no-repeat;
       overflow: hidden;
       scrollbar-width: none;
-      background-size: 90%;  /* Change 'contain' to your preferred size option */
-        background-position: center bottom; /* Change as needed */
-        background-repeat: no-repeat;
-      }
-    
+      background-size: 90%;
+      background-position: center bottom;
+      background-repeat: no-repeat;
+    }
     .border-frame::-webkit-scrollbar {
       width: 0;
       background: transparent;
@@ -53,7 +52,7 @@
       z-index: 0;
     }
     .bg-overlay.faded {
-      background-color: rgba(255, 255, 255, 0.318);
+      background-color: rgba(255,255,255,0.318);
       backdrop-filter: blur(2px);
     }
     /* HEADER & NAV */
@@ -65,7 +64,7 @@
       border-bottom: 2px solid #000000ca;
     }
     .chat-header {
-      color:#64d6b5;
+      color: #64d6b5;
       text-align: center;
       font-size: 1.9em;
       font-weight: 750;
@@ -93,7 +92,14 @@
       color: #1c1b2d;
       border-radius: 10px;
     }
-    /* MAIN CONTENT (DESKTOP) */
+    /* MAIN CONTENT: Two Views */
+    #main-content {
+      flex: 1 1 auto;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+    /* CHAT VIEW */
     .chat-container {
       flex: 1 1 auto;
       display: flex;
@@ -103,15 +109,15 @@
       overflow: hidden;
       position: relative;
     }
-    /* SIDEBAR (DESKTOP) */
+    /* SIDEBAR */
     .sidebar {
       position: absolute;
       top: 0;
       left: 0;
       width: 195px;
       height: 100%;
-      margin-top: 1px; /* pushes sidebar down so chat messages begin below header/nav */
-      background-color:#05050583 ;
+      margin-top: 1px;
+      background-color: #05050583;
       color: white;
       padding: 10px;
       border-right: 2px solid #512b63ca;
@@ -155,9 +161,9 @@
       border-bottom: 1px solid rgba(255,255,255,0.2);
     }
     .sidebar li:hover {
-      background-color: rgba(43, 41, 41, 0.2);
+      background-color: rgba(43,41,41,0.2);
     }
-    /* CHAT CONTENT (DESKTOP) */
+    /* CHAT CONTENT */
     .chat-content {
       margin-left: 195px;
       flex: 1 1 auto;
@@ -185,7 +191,7 @@
     .chat-box::-webkit-scrollbar-track {
       background: #a8bfd3;
     }
-    /* FIXED INPUT CONTAINER (DESKTOP) */
+    /* FIXED INPUT CONTAINER */
     .input-container {
       position: absolute;
       bottom: 0;
@@ -199,6 +205,7 @@
       gap: 10px;
       z-index: 999;
       border-radius: 0 0 15px 15px;
+      background-color: #000000;
     }
     .input-container textarea {
       flex-grow: 1;
@@ -228,35 +235,7 @@
     .input-container button:hover {
       background-color: #64d6b5;
     }
-    /* CHAT BUBBLES */
-    .user-message {
-      background-color:#64d6b5 ;
-      color: white;
-      padding: 10px 15px;
-      border-radius: 15px;
-      margin: 10px 0;
-      align-self: flex-end;
-      max-width: 80%;
-      font-size: 1.3em;
-      margin-right: 20%;
-    }
-    .assistant-message {
-      background-color:#7e33dfea ;
-      color: black;
-      padding: 10px 15px;
-      border-radius: 15px;
-      margin: 10px 0;
-      align-self: flex-start;
-      max-width: 80%;
-      font-size: 1.3em;
-      margin-left: 30%;
-    }
-    .assistant-message a {
-      color: blue;
-      text-decoration: underline;
-      cursor: pointer;
-    }
-    /* SIDEBAR TAB (Desktop) - always visible */
+    /* SIDEBAR TAB */
     .sidebar-tab {
       position: absolute;
       top: 120px;
@@ -264,7 +243,7 @@
       width: 20px;
       height: 75px;
       margin-top: 35px;
-      background-color:#8632f3 ;
+      background-color: #8632f3;
       color: #fff;
       display: flex;
       align-items: center;
@@ -273,6 +252,17 @@
       border-radius: 0 5px 5px 0;
       transition: 0.3s ease;
       z-index: 2000;
+    }
+    /* RESOURCE VIEW */
+    .resource-container {
+      flex: 1 1 auto;
+      display: none;
+      position: relative;
+    }
+    .resource-iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
     }
     /* SETTINGS MODAL */
     #custom-instructions-modal {
@@ -302,6 +292,34 @@
     #custom-instructions-modal button {
       margin-right: 10px;
     }
+    /* CHAT BUBBLES */
+    .user-message {
+      background-color: #64d6b5;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 15px;
+      margin: 10px 0;
+      align-self: flex-end;
+      max-width: 80%;
+      font-size: 1.3em;
+      margin-right: 20%;
+    }
+    .assistant-message {
+      background-color: #7e33dfea;
+      color: black;
+      padding: 10px 15px;
+      border-radius: 15px;
+      margin: 10px 0;
+      align-self: flex-start;
+      max-width: 80%;
+      font-size: 1.3em;
+      margin-left: 30%;
+    }
+    .assistant-message a {
+      color: blue;
+      text-decoration: underline;
+      cursor: pointer;
+    }
     /* MOBILE OVERRIDES */
     @media (max-width: 768px) {
       .border-frame {
@@ -310,9 +328,8 @@
         margin-bottom: 60px;
         border-radius: 0;
         box-shadow: none;
-        /* Adjust background image properties for mobile */
-        background-size: 170%;  /* Change 'contain' to your preferred size option */
-        background-position: center center; /* Change as needed */
+        background-size: 92%;
+        background-position: center bottom;
         background-repeat: no-repeat;
       }
       .header-container {
@@ -330,7 +347,7 @@
         padding: 2px 0;
       }
       .nav-menu {
-        background-color: black;
+        background-color: #000000;
         padding: 4px 0;
       }
       .nav-menu a {
@@ -348,9 +365,9 @@
         left: 0;
         width: 60px;
         height: calc(100vh - 60px);
-        margin-top:40px;
+        margin-top: 40px;
         padding: 5px;
-        background-color:#05050583 ;
+        background-color: #05050583;
         z-index: 1000;
         transition: transform 0.3s ease, width 0.3s ease;
         transform: translateX(-60px);
@@ -446,7 +463,7 @@
       </div>
       <!-- RESOURCE CONTAINER (hidden by default) -->
       <div class="resource-container" id="resource-view" style="display: none;">
-        <iframe class="resource-iframe" src="/static/resource.html" title="Resource Page"></iframe>
+        <iframe class="resource-iframe" src="resource.html" title="Resource Page"></iframe>
       </div>
     </div>
   </div>
@@ -590,6 +607,7 @@
           if (data.messages && data.messages.length > 0) {
             data.messages.forEach(msg => {
               const msgDiv = document.createElement("div");
+              // role === "user" => .user-message, else => .assistant-message
               msgDiv.className = (msg.role === "user") ? "user-message" : "assistant-message";
               msgDiv.innerHTML = markdownToHTML(msg.content);
               messagesContainer.appendChild(msgDiv);
