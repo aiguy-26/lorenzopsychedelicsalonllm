@@ -200,7 +200,7 @@ def get_template(template_base):
             return "dark.html"
         elif theme == "light":
             return "light.html"
-    elif template_base == "about":
+    elif template_base == "resource":
        
             return "resource.html"
     elif template_base == "mp3":
@@ -315,9 +315,9 @@ def get_response():
 def index():
     return render_template(get_template("index"))
 
-@app.route('/about ')
+@app.route('/resource ')
 def about_terence():
-    return render_template(get_template("about.html"))
+    return render_template(get_template("resource.html"))
 
 @app.route('/audio_player')
 def audio_player():
