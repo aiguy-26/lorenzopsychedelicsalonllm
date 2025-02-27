@@ -202,17 +202,17 @@ def get_template(template_base):
             return "light.html"
         else:
             return "classic.html"
-    elif template_base == "about":
+    elif template_base == "resource":
         if theme == "classic":
-            return "classicbio.html"
+            return "resource.html"
         elif theme == "psychedelic":
-            return "psychedelicbio.html"
+            return "resource.html"
         elif theme == "dark":
-            return "darkbio.html"
+            return "resource.html"
         elif theme == "light":
-            return "lightbio.html"
+            return "resource.html"
         else:
-            return "classicbio.html"
+            return "resource.html"
     elif template_base == "mp3":
         if theme == "classic":
             return "classicmp3.html"
@@ -325,7 +325,7 @@ def get_response():
 def index():
     return render_template(get_template("index"))
 
-@app.route('/about')
+@app.route('/resource')
 def about_terence():
     return render_template(get_template("about"))
 
