@@ -650,7 +650,8 @@
           aiMessage.innerHTML = markdownToHTML(data.response || "No response.");
           messagesContainer.appendChild(aiMessage);
           if (messagesContainer.lastElementChild) {
-            messagesContainer.scrollTop = messagesContainer.lastElementChild.offsetTop;
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
           }
           if (!chat_id && data.chat_id) {
             chat_id = data.chat_id;
