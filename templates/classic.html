@@ -66,6 +66,7 @@
     .chat-header {
       color: #64d6b5;
       text-align: center;
+      font-family: 'Montserrat', sans-serif;
       font-size: 1.9em;
       font-weight: 750;
       text-transform: uppercase;
@@ -615,7 +616,7 @@
               messagesContainer.appendChild(msgDiv);
             });
             if (messagesContainer.lastElementChild) {
-              messagesContainer.scrollTop = messagesContainer.lastElementChild.offsetTop;
+              messagesContainer.lastElementChild.scrollIntoView({ behavior: "smooth" });
             }
           } else {
             messagesContainer.innerHTML = "<p style='color:white; text-align:center;'>No messages yet. Start the conversation!</p>";
@@ -650,8 +651,7 @@
           aiMessage.innerHTML = markdownToHTML(data.response || "No response.");
           messagesContainer.appendChild(aiMessage);
           if (messagesContainer.lastElementChild) {
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-
+            messagesContainer.lastElementChild.scrollIntoView({ behavior: "smooth" });
           }
           if (!chat_id && data.chat_id) {
             chat_id = data.chat_id;
