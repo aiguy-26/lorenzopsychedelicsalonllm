@@ -181,6 +181,7 @@
       padding: 20px 20px 100px 20px;
       overflow-y: auto;
       border-radius: 0 0 15px 15px;
+      scroll-behavior: smooth; /* Enables smooth manual scrolling */
     }
     .chat-box::-webkit-scrollbar {
       width: 8px;
@@ -323,108 +324,105 @@
     }
     /* MOBILE OVERRIDES */
     @media (max-width: 768px) {
-  .border-frame {
-    width: 100%;
-    height: 100vh;
-    margin: 0;
-    border-radius: 0;
-    box-shadow: none;
-    background-size: cover;
-    background-position: center 80px; /* Push image down 80px so header doesn't cover it */
-    background-repeat: no-repeat;
-  }
-  .header-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 80px;
-    padding: 5px 0;
-    z-index: 3000;
-    /* Removed margin-top so the header is flush at the top */
-  }
-  .chat-header {
-    font-size: 1.2em;
-    padding: 2px 0;
-  }
-  .nav-menu {
-    background-color:#05050583;
-    padding: 4px 0;
-  }
-  .nav-menu a {
-    font-size: 1em;
-    padding: 4px 10px;
-  }
-  .chat-container {
-    flex-direction: column;
-    border: none;
-    margin-top: 85px;
-  }
-  .sidebar {
-    position: fixed;
-    top: 60px;
-    left: 0;
-    width: 60px;
-    height: calc(100vh - 60px);
-    margin-top: 40px;
-    padding: 5px;
-    background-color:#05050583;
-    z-index: 1000;
-    transition: transform 0.3s ease, width 0.3s ease;
-    transform: translateX(-60px);
-    border-right: none;
-  }
-  .sidebar.collapsed {
-    transform: translateX(-60px);
-  }
-  .sidebar.expanded {
-    transform: translateX(0);
-    width: 125px;
-  }
-  .chat-content {
-    margin-left: 0;
-  }
-  .chat-box {
-    padding: 10px 10px 120px 10px;
-  }
-  .input-container {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: auto;
-    padding: 10px;
-    gap: 5px;
-    background-color: #56565480;
-    border-top: 1px solid #928e73;
-    border-radius: 0;
-    z-index: 999;
-  }
-  .input-container textarea {
-    width: 100%;
-    font-size: 1em;
-    padding: 5px;
-    min-height: 35px;
-  }
-  .input-container button {
-    font-size: 1em;
-    padding: 5px 10px;
-  }
-  .user-message, .assistant-message {
-    font-size: 1em;
-    max-width: 70%;
-  }
-  .sidebar-tab {
-    position: fixed;
-    margin-top: 87px;
-    left: 0;
-    width: 20px;
-    height: 75px;
-    z-index: 2000;
-  }
-}
-
-
+      .border-frame {
+        width: 100%;
+        height: 100vh;
+        margin: 0;
+        border-radius: 0;
+        box-shadow: none;
+        background-size: cover;
+        background-position: center 80px; /* Push image down 80px so header doesn't cover it */
+        background-repeat: no-repeat;
+      }
+      .header-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 80px;
+        padding: 5px 0;
+        z-index: 3000;
+      }
+      .chat-header {
+        font-size: 1.2em;
+        padding: 2px 0;
+      }
+      .nav-menu {
+        background-color:#05050583;
+        padding: 4px 0;
+      }
+      .nav-menu a {
+        font-size: 1em;
+        padding: 4px 10px;
+      }
+      .chat-container {
+        flex-direction: column;
+        border: none;
+        margin-top: 85px;
+      }
+      .sidebar {
+        position: fixed;
+        top: 60px;
+        left: 0;
+        width: 60px;
+        height: calc(100vh - 60px);
+        margin-top: 40px;
+        padding: 5px;
+        background-color:#05050583;
+        z-index: 1000;
+        transition: transform 0.3s ease, width 0.3s ease;
+        transform: translateX(-60px);
+        border-right: none;
+      }
+      .sidebar.collapsed {
+        transform: translateX(-60px);
+      }
+      .sidebar.expanded {
+        transform: translateX(0);
+        width: 125px;
+      }
+      .chat-content {
+        margin-left: 0;
+      }
+      .chat-box {
+        padding: 10px 10px 120px 10px;
+      }
+      .input-container {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: auto;
+        padding: 10px;
+        gap: 5px;
+        background-color: #56565480;
+        border-top: 1px solid #928e73;
+        border-radius: 0;
+        z-index: 999;
+      }
+      .input-container textarea {
+        width: 100%;
+        font-size: 1em;
+        padding: 5px;
+        min-height: 35px;
+      }
+      .input-container button {
+        font-size: 1em;
+        padding: 5px 10px;
+      }
+      .user-message, .assistant-message {
+        font-size: 1em;
+        max-width: 70%;
+      }
+      .sidebar-tab {
+        position: fixed;
+        margin-top: 87px;
+        left: 0;
+        width: 20px;
+        height: 75px;
+        z-index: 2000;
+      }
+    }
   </style>
 </head>
 <body>
