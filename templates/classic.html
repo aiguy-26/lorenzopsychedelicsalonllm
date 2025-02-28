@@ -32,7 +32,7 @@
       box-shadow: 0 8px 20px rgba(0,0,0,0.2);
       margin: auto;
       background: url("/static/salonpic3.png") center center / cover no-repeat;
-      background-attachment: fixed; /* Keeps background fixed */
+      background-attachment: fixed; /* fixed background */
       overflow: hidden;
       scrollbar-width: none;
       background-size: 90%;
@@ -108,7 +108,8 @@
       flex-direction: row;
       border: 5px solid #525252ea;
       z-index: 1;
-      overflow: hidden;
+      /* Remove overflow hidden to allow the chat-box to scroll */
+      /* overflow: hidden; */
       position: relative;
     }
     /* SIDEBAR */
@@ -176,15 +177,15 @@
       overflow: hidden;
       position: relative;
       z-index: 1;
-      min-height: 0;  /* Allows child flex items to shrink properly */
+      min-height: 0;
     }
     .chat-box {
-      flex-grow: 1;
+      flex: 1;
+      min-height: 0;
       padding: 20px 20px 100px 20px;
       overflow-y: auto;
       border-radius: 0 0 15px 15px;
       scroll-behavior: smooth;
-      min-height: 0;
     }
     .chat-box::-webkit-scrollbar {
       width: 8px;
@@ -334,7 +335,7 @@
         border-radius: 0;
         box-shadow: none;
         background-size: cover;
-        background-position: center 80px;
+        background-position: center 80px; /* Push image down 80px so header doesn't cover it */
         background-repeat: no-repeat;
       }
       .header-container {
@@ -534,7 +535,6 @@
       const modal = document.getElementById('custom-instructions-modal');
       const textarea = document.getElementById('custom-instructions-input');
       textarea.value = localStorage.getItem('customInstructions') || '';
-      // Set theme dropdown from cookie
       const themeCookie = document.cookie.split('; ').find(row => row.startsWith('theme='));
       if (themeCookie) {
         document.getElementById('theme-select').value = themeCookie.split('=')[1];
@@ -611,7 +611,6 @@
           if (data.messages && data.messages.length > 0) {
             data.messages.forEach(msg => {
               const msgDiv = document.createElement("div");
-              // role === "user" => .user-message, else => .assistant-message
               msgDiv.className = (msg.role === "user") ? "user-message" : "assistant-message";
               msgDiv.innerHTML = markdownToHTML(msg.content);
               messagesContainer.appendChild(msgDiv);
