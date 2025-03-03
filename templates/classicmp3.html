@@ -171,10 +171,11 @@
     <div class="talks-container">
       {% for talk in talks %}
       <div class="talk">
-        <h2>{{ talk.title }}</h2>
-        <p>Podcast Number: {{ talk.title.split(' ')[1] }}</p>
+        <h2>{{ talk.name }}</h2>
+        <p>Podcast Number: {{ talk.number.split(' ')[1] }}</p>
         <!-- The play button opens the audio player page in a new window -->
-        <button onclick="openAudioInNewWindow('{{ talk.mp3_link if talk.mp3_link else talk.local_mp3_path }}')">Play</button>
+        <button data-mp3="{{ talk.mp3_link }}" onclick="openAudioInNewWindow(this.getAttribute('data-mp3'))">Play</button>
+
       </div>
       {% endfor %}
     </div>
