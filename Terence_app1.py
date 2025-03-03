@@ -138,25 +138,29 @@ def call_gpt4o_mini_model(prompt, user_id, chat_id=None, relevant_context=None, 
             conversation_contexts[user_id] = []
 
         conversation_history = conversation_contexts[user_id]
+        # Keep only the last 10 exchanges
         if len(conversation_history) > 10:
             conversation_history = conversation_history[-10:]
+            conversation_contexts[user_id] = conversation_history
 
-        combined_instructions = ('''You are Lozo the AI frontman for Lorenzo's Psychedelic Salon. We have a Database of over 700 talks by Psychedelic elders like Leary, McKenna, Sheldrake, 
-                                Ramm Dass, and more. These talks have been transcribed and are being sent as snippets via RAG retrieval. Use the context and user prompt to 
-                                provide a thought provoking, insightful response. Keep everything conversational—no lists unless asked. Speak in eloquent prose, but 
-                                don’t start every response with a filler phrase. Be compassionate if someone is suffering, yet never condone violence or cruelty.
-                                When a user asks a great question, unpack the snippets and ask follow‑up questions. When beneficial, recommend an mp3 talk from our archives, but only if it adds value.
+        combined_instructions = ('''You are the AI embodiment of Terence Mckenna's ideas and works. You are being fed 
+                                 transcribed snippets from over 400 hours of Terence Mckenna's talks and I want you to use the context in the snippets, along with your 
+                                 own knowledge, to answer user's queries. Do not mention the snippets directly. Instead, occasionally quote Terence in long quotes,
+                                 and speak in a way that appeals to fans of his work. Do not begin your response with repetitive, overly dramatic phrases like "AHH".
+                                 Do not use lists unless the user asks for them. Your goal is to deliver mind-blowing responses that unpack complex ideas, challenging cultural and social norms.
+                                 Please speak very articulately, as if you are Terence himself—using his style of combining concepts into new, meaningful insights.
+                                 If it helps the user, recommend a talk with a link at the end of your response (using only metadata links from the snippets).
                                  ''')
-        
         if custom_instructions.strip():
             combined_instructions += f"\n\nCustom Instructions:\n{custom_instructions}"
 
-        messages = []
-        if not conversation_history:
-            messages.append({"role": "system", "content": combined_instructions})
+        # Always prepend the system message in every call.
+        messages = [{"role": "system", "content": combined_instructions}]
+        # Append any conversation history if exists.
         for exchange in conversation_history:
             messages.append({"role": "user", "content": exchange["user"]})
             messages.append({"role": "assistant", "content": exchange["assistant"]})
+        # Append current query with context.
         messages.append({
             "role": "user",
             "content": f"Context:\n{relevant_context}\n\nPrompt:\n{prompt}"
@@ -175,6 +179,7 @@ def call_gpt4o_mini_model(prompt, user_id, chat_id=None, relevant_context=None, 
         return f"❌ OpenAI API error: {str(api_err)}", chat_id
     except Exception as e:
         return f"❌ An unexpected error occurred: {str(e)}", chat_id
+
 
 # -------------------------
 #   New: Theme Selection
