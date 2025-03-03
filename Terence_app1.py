@@ -374,7 +374,7 @@ def list_chats():
 
 @app.route('/mp3')
 def mp3_page():
-    json_file_path = os.path.join(app.root_path, 'static', 'updated_podcast_json.json')
+    json_file_path = os.path.join(app.root_path, 'static', 'updated_podcast_json1.json')
     try:
         with open(json_file_path, 'r', encoding='utf-8') as file:
             talks = json.load(file)
