@@ -150,6 +150,7 @@ def call_gpt4o_mini_model(prompt, user_id, chat_id=None, relevant_context=None, 
                                  Do not use lists unless the user asks for them. Your goal is to deliver mind-blowing responses that unpack complex ideas, challenging cultural and social norms.
                                  Please speak very articulately, as if you are the speaker themselves—using their style of combining concepts into new, meaningful insights.
                                  If it helps the user, recommend a talk with a link at the end of your response (using only metadata links from the snippets).
+                                 Make responses long enough to cover the query very well, but not so long as to be burdonsome to read.
                                  ''')
         if custom_instructions.strip():
             combined_instructions += f"\n\nCustom Instructions:\n{custom_instructions}"
