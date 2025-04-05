@@ -376,7 +376,7 @@ def list_chats():
 @app.route('/mp3')
 def mp3_page():
     # Use a relative path instead of an absolute path
-    json_file_path = os.path.join(app.root_path, 'static', 'terence_summaries.json')
+    json_file_path = os.path.join(app.root_path, 'static', 'summaries.json')
     try:
         with open(json_file_path, 'r', encoding='utf-8') as file:
             summaries = json.load(file)
