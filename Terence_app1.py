@@ -375,17 +375,24 @@ def list_chats():
 
 @app.route('/mp3')
 def mp3_page():
-    json_file_path = os.path.join(app.root_path, 'static', 'updated_podcast_json1.json')
+    # Use a relative path instead of an absolute path
+    json_file_path = os.path.join(app.root_path, 'static', 'terence_summaries.json')
     try:
         with open(json_file_path, 'r', encoding='utf-8') as file:
-            talks = json.load(file)
+            summaries = json.load(file)
+            print(f"✅ Successfully loaded {len(summaries)} talks from summaries.json")
+
+            # Convert the dictionary into a list of dicts for easier handling
+            talks = [{"title": key, "description": value} for key, value in summaries.items()]
+            print(f"Sample talk data: {talks[0] if talks else 'No data'}")
     except Exception as e:
-        print(f"Error loading JSON: {e}")
+        print(f"❌ Error loading JSON: {e}")
         talks = []
 
     query = request.args.get('q', '').strip()
     if query:
         talks = [t for t in talks if query.lower() in t.get('title', '').lower()]
+        print(f"🔍 Filtered talks by query '{query}': {len(talks)} found")
 
     def extract_podcast_number(talk):
         try:
@@ -393,7 +400,11 @@ def mp3_page():
         except:
             return float('inf')
 
-    talks.sort(key=extract_podcast_number)
+    if talks:
+        talks.sort(key=extract_podcast_number)
+    else:
+        print("⚠️ No talks loaded or found after filtering")
+
     page = int(request.args.get('page', 1))
     talks_per_page = 20
     total_talks = len(talks)
@@ -402,6 +413,8 @@ def mp3_page():
     end = start + talks_per_page
     talks_on_page = talks[start:end]
 
+    print(f"📃 Displaying page {page} with talks {start} to {end} (total: {total_talks})")
+
     return render_template(
         get_template("mp3"),
         talks=talks_on_page,
@@ -409,6 +422,7 @@ def mp3_page():
         total_pages=total_pages,
         query=query
     )
+
 
 if __name__ == '__main__':
     ensure_collection_exists_with_hnsw()

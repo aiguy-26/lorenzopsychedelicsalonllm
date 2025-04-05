@@ -202,7 +202,7 @@
       {% for talk in talks %}
       <div class="talk">
         <h2>{{ talk.title }}</h2>
-        <p>Podcast Number: {{ talk.title.split(' ')[1] }}</p>
+        <p>{{ talk.description }}</p>
         <!-- The play button opens the audio player page in a new window -->
         <button onclick="openAudioInNewWindow('{{ talk.mp3_link if talk.mp3_link else talk.local_mp3_path }}')">Play</button>
       </div>
