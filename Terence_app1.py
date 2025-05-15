@@ -397,12 +397,12 @@ def mp3_page():
         summaries = {}
 
     # 2) Load updated JSON (with working mp3_link fields)
-    updated_path = os.path.join(app.root_path, 'static', 'updated_podcast_json.json')
+    updated_path = os.path.join(app.root_path, 'static', 'updated_podcast_json1.json')
     try:
         with open(updated_path, 'r', encoding='utf-8') as f:
             updated = json.load(f)    # [ { title, mp3_link, ... }, ... ]
     except Exception as e:
-        print(f"❌ Error loading updated_podcast_json.json: {e}")
+        print(f"❌ Error loading updated_podcast_json1.json: {e}")
         updated = []
 
     # 3) Build combined list
