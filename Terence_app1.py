@@ -11,6 +11,11 @@ from datetime import datetime, timedelta
 from werkzeug.utils import secure_filename
 import psycopg2
 import boto3
+from urllib.parse import quote
+
+# public GCS bucket (same default you used elsewhere)
+GCS_BUCKET = os.getenv("BUCKET_NAME", "psychedeli_salon_mp3s")
+
 
 # Load PostgreSQL connection URL
 DATABASE_URL = os.getenv("DATABASE_URL")
@@ -328,7 +333,10 @@ def index():
 
 @app.route('/audio_player')
 def audio_player():
-    return render_template('audio_player.html')
+    src = request.args.get('src')
+    if not src:
+        return "No source specified", 400
+    return render_template('audio_player.html', src=src)
 
 @app.route("/delete_chat", methods=["DELETE"])
 def delete_chat():
@@ -375,53 +383,57 @@ def list_chats():
 
 @app.route('/mp3')
 def mp3_page():
-    # Use a relative path instead of an absolute path
+    # 1) Load summaries.json from your static folder
     json_file_path = os.path.join(app.root_path, 'static', 'summaries.json')
     try:
-        with open(json_file_path, 'r', encoding='utf-8') as file:
-            summaries = json.load(file)
-            print(f"✅ Successfully loaded {len(summaries)} talks from summaries.json")
-
-            # Convert the dictionary into a list of dicts for easier handling
-            talks = [{"title": key, "description": value} for key, value in summaries.items()]
-            print(f"Sample talk data: {talks[0] if talks else 'No data'}")
+        with open(json_file_path, 'r', encoding='utf-8') as f:
+            summaries = json.load(f)
+            print(f"✅ Loaded {len(summaries)} entries from summaries.json")
     except Exception as e:
-        print(f"❌ Error loading JSON: {e}")
-        talks = []
+        print(f"❌ Error loading summaries.json: {e}")
+        summaries = {}
 
-    query = request.args.get('q', '').strip()
+    # 2) Build the talks list (title, description, and public mp3_link)
+    talks = []
+    for title, desc in summaries.items():
+        filename = f"{title}.mp3"
+        encoded  = quote(filename, safe='')
+        mp3_url  = f"https://storage.googleapis.com/{GCS_BUCKET}/{encoded}"
+        talks.append({
+            "title":       title,
+            "description": desc,
+            "mp3_link":    mp3_url
+        })
+
+    # 3) Optional search filter
+    query = request.args.get('q', '').strip().lower()
     if query:
-        talks = [t for t in talks if query.lower() in t.get('title', '').lower()]
-        print(f"🔍 Filtered talks by query '{query}': {len(talks)} found")
+        talks = [t for t in talks if query in t['title'].lower()]
 
-    def extract_podcast_number(talk):
-        try:
-            return int(re.search(r'(\d+)', talk['title']).group(1))
-        except:
-            return float('inf')
+    # 4) Sort by the numeric podcast ID in the title
+    def extract_num(t):
+        m = re.search(r'(\d+)', t['title'])
+        return int(m.group(1)) if m else float('inf')
+    talks.sort(key=extract_num)
 
-    if talks:
-        talks.sort(key=extract_podcast_number)
-    else:
-        print("⚠️ No talks loaded or found after filtering")
+    # 5) Paginate
+    page       = int(request.args.get('page', 1))
+    per_page   = 20
+    total      = len(talks)
+    total_pages = (total + per_page - 1) // per_page
+    start, end = (page - 1) * per_page, page * per_page
+    page_talks = talks[start:end]
 
-    page = int(request.args.get('page', 1))
-    talks_per_page = 20
-    total_talks = len(talks)
-    total_pages = (total_talks + talks_per_page - 1) // talks_per_page
-    start = (page - 1) * talks_per_page
-    end = start + talks_per_page
-    talks_on_page = talks[start:end]
-
-    print(f"📃 Displaying page {page} with talks {start} to {end} (total: {total_talks})")
+    print(f"📃 Rendering page {page}/{total_pages} (talks {start}–{end-1})")
 
     return render_template(
         get_template("mp3"),
-        talks=talks_on_page,
-        page=page,
-        total_pages=total_pages,
-        query=query
+        talks       = page_talks,
+        page        = page,
+        total_pages = total_pages,
+        query       = request.args.get('q', '')
     )
+
 
 
 if __name__ == '__main__':

@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Audio Player</title>
   <style>
     body { 
@@ -19,21 +19,15 @@
 </head>
 <body>
   <h1>Audio Player</h1>
-  <audio controls autoplay id="audioPlayer">
-    Your browser does not support the audio element.
-  </audio>
 
-  <script>
-    // Function to get query parameter by name
-    function getQueryParam(name) {
-      const urlParams = new URLSearchParams(window.location.search);
-      return urlParams.get(name);
-    }
+  {% if src %}
+    <audio controls autoplay>
+      <source src="{{ src }}" type="audio/mpeg">
+      Your browser does not support the audio element.
+    </audio>
+  {% else %}
+    <p style="color: #f88;">No audio source specified.</p>
+  {% endif %}
 
-    const src = getQueryParam('src');
-    if (src) {
-      document.getElementById('audioPlayer').src = src;
-    }
-  </script>
 </body>
 </html>
