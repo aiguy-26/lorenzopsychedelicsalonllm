@@ -383,56 +383,64 @@ def list_chats():
 
 @app.route('/mp3')
 def mp3_page():
-    # 1) Load summaries.json from your static folder
-    json_file_path = os.path.join(app.root_path, 'static', 'summaries.json')
+    q       = request.args.get('q', '').strip().lower()
+    page    = int(request.args.get('page', 1))
+    per_page= 20
+
+    # 1) Load summaries.json
+    summaries_path = os.path.join(app.root_path, 'static', 'summaries.json')
     try:
-        with open(json_file_path, 'r', encoding='utf-8') as f:
-            summaries = json.load(f)
-            print(f"✅ Loaded {len(summaries)} entries from summaries.json")
+        with open(summaries_path, 'r', encoding='utf-8') as f:
+            summaries = json.load(f)  # { title: description, ... }
     except Exception as e:
         print(f"❌ Error loading summaries.json: {e}")
         summaries = {}
 
-    # 2) Build the talks list (title, description, and public mp3_link)
+    # 2) Load updated JSON (with working mp3_link fields)
+    updated_path = os.path.join(app.root_path, 'static', 'updated_podcast_json.json')
+    try:
+        with open(updated_path, 'r', encoding='utf-8') as f:
+            updated = json.load(f)    # [ { title, mp3_link, ... }, ... ]
+    except Exception as e:
+        print(f"❌ Error loading updated_podcast_json.json: {e}")
+        updated = []
+
+    # 3) Build combined list
     talks = []
-    for title, desc in summaries.items():
-        filename = f"{title}.mp3"
-        encoded  = quote(filename, safe='')
-        mp3_url  = f"https://storage.googleapis.com/{GCS_BUCKET}/{encoded}"
+    for e in updated:
+        title    = e.get('title','').strip()
+        mp3_link = e.get('mp3_link','').strip()
+        desc     = summaries.get(title, '')
+
+        if q and q not in title.lower():
+            continue
+
         talks.append({
-            "title":       title,
-            "description": desc,
-            "mp3_link":    mp3_url
+            'title':       title,
+            'description': desc,
+            'mp3_link':    mp3_link
         })
 
-    # 3) Optional search filter
-    query = request.args.get('q', '').strip().lower()
-    if query:
-        talks = [t for t in talks if query in t['title'].lower()]
-
-    # 4) Sort by the numeric podcast ID in the title
+    # 4) Sort by numeric podcast ID in title
     def extract_num(t):
         m = re.search(r'(\d+)', t['title'])
         return int(m.group(1)) if m else float('inf')
     talks.sort(key=extract_num)
 
     # 5) Paginate
-    page       = int(request.args.get('page', 1))
-    per_page   = 20
-    total      = len(talks)
+    total       = len(talks)
     total_pages = (total + per_page - 1) // per_page
-    start, end = (page - 1) * per_page, page * per_page
-    page_talks = talks[start:end]
-
-    print(f"📃 Rendering page {page}/{total_pages} (talks {start}–{end-1})")
+    start, end  = (page-1)*per_page, page*per_page
+    page_talks  = talks[start:end]
 
     return render_template(
         get_template("mp3"),
         talks       = page_talks,
         page        = page,
         total_pages = total_pages,
-        query       = request.args.get('q', '')
+        query       = q
     )
+
 
 
 
