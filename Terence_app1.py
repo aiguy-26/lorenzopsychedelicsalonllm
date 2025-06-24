@@ -12,7 +12,7 @@ from werkzeug.utils import secure_filename
 import psycopg2
 import boto3
 from urllib.parse import quote
-
+import tempfile
 # public GCS bucket (same default you used elsewhere)
 GCS_BUCKET = os.getenv("BUCKET_NAME", "psychedeli_salon_mp3s")
 
@@ -232,7 +232,20 @@ def get_template(template_base):
     else:
         # fallback for any other route
         return f"{template_base}.html"
+    
+#  transcribe_audio
 
+from faster_whisper import WhisperModel
+
+def transcribe_audio(file_path):
+    model = WhisperModel("tiny", compute_type="int8", device="cpu")
+
+    segments, _ = model.transcribe(file_path, vad_filter=True)
+
+    result = []
+    for segment in segments:
+        result.append(segment.text)
+    return " ".join(result)
 
 # -------------------------
 #   Chat History and API Routes
@@ -266,20 +279,47 @@ def get_chat():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+@app.route("/transcribe_audio", methods=["POST"])
+def transcribe_audio_endpoint():
+    try:
+        if 'audio' not in request.files:
+            return jsonify({"error": "No audio file uploaded"}), 400
+
+        audio_file = request.files['audio']
+        temp_path = os.path.join(tempfile.gettempdir(), "uploaded_audio.webm")
+        audio_file.save(temp_path)
+
+        transcription = transcribe_audio(temp_path)
+
+        return jsonify({"transcript": transcription})
+
+    except Exception as e:
+        print("Transcription error:", e)
+        return jsonify({"error": str(e)}), 500
+("After transcription request")
 
 @app.route('/get_response', methods=['POST'])
 def get_response():
     try:
-        data = request.json
-        user_input = data.get('user_input', '')
-        custom_instructions = data.get('custom_instructions', '')
-        chat_id = data.get('chat_id')
-        user_id = data.get('user_id')
+        # 1️⃣ Parse incoming JSON payload
+        data = request.get_json()
+        print("Received payload:", data)
+
+        user_input          = data.get('user_input', '').strip()
+        prompt_type         = data.get('prompt_type', 'default')
+        custom_instructions = data.get('custom_instructions', '').strip()
+        voice_mode          = data.get('voice_mode', False)
+        chat_id             = data.get('chat_id')
+        user_id             = data.get('user_id')
+
+        # 2️⃣ Validate required fields
         if not user_id:
             return jsonify({'status': 'error', 'message': 'user_id is required'}), 400
         if not user_input:
             return jsonify({'status': 'error', 'message': 'Invalid input'}), 400
 
+        # 3️⃣ Create new chat session if needed
         if not chat_id:
             chat_id = str(uuid.uuid4())
             title = user_input[:50]
@@ -291,14 +331,18 @@ def get_response():
                         (chat_id, user_id, title)
                     )
 
+        # 4️⃣ Call our GPT wrapper, passing through persona + voice flags
         ai_response, updated_chat_id = call_gpt4o_mini_model(
-            prompt=user_input,
-            user_id=user_id,
-            chat_id=chat_id,
-            custom_instructions=custom_instructions
+            prompt              = user_input,
+            user_id             = user_id,
+            chat_id             = chat_id,
+            prompt_type         = prompt_type,
+            custom_instructions = custom_instructions,
+            voice_mode          = voice_mode
         )
         chat_id = updated_chat_id or chat_id
 
+        # 5️⃣ Persist both user and assistant messages
         with psycopg2.connect(DATABASE_URL) as conn:
             with conn.cursor() as cur:
                 cur.execute(
@@ -312,6 +356,7 @@ def get_response():
                     (chat_id, 'assistant', ai_response)
                 )
 
+        # 6️⃣ Return the AI’s reply and the (possibly new) chat_id
         return jsonify({
             'status': 'success',
             'response': ai_response,
@@ -415,6 +460,12 @@ def mp3_page():
     for t in talks:
         num = t.get('number', '').strip()
         t['description'] = desc_by_number.get(num, "")
+    # 4.1) Remove any items with no real MP3 link
+    talks = [
+        t for t in talks
+        if t.get("mp3_link") 
+           and not t["mp3_link"].rstrip('/').endswith("psychedeli_salon_mp3s")
+    ]
 
     # 5) Apply search filter
     q = request.args.get('q', '').strip().lower()
