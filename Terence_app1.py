@@ -383,56 +383,59 @@ def list_chats():
 
 @app.route('/mp3')
 def mp3_page():
-    q       = request.args.get('q', '').strip().lower()
-    page    = int(request.args.get('page', 1))
-    per_page= 20
+    # 1) Load the main talks metadata
+    meta_path    = os.path.join(app.root_path, 'static', 'updated_podcast_json1.json')
+    summary_path = os.path.join(app.root_path, 'static', 'summaries.json')
 
-    # 1) Load summaries.json
-    summaries_path = os.path.join(app.root_path, 'static', 'summaries.json')
     try:
-        with open(summaries_path, 'r', encoding='utf-8') as f:
-            summaries = json.load(f)  # { title: description, ... }
-    except Exception as e:
-        print(f"❌ Error loading summaries.json: {e}")
+        with open(meta_path, 'r', encoding='utf-8') as f:
+            talks = json.load(f)
+    except FileNotFoundError:
+        talks = []
+
+    # 2) Load the summaries file
+    try:
+        with open(summary_path, 'r', encoding='utf-8') as f:
+            summaries = json.load(f)
+    except FileNotFoundError:
         summaries = {}
 
-    # 2) Load updated JSON (with working mp3_link fields)
-    updated_path = os.path.join(app.root_path, 'static', 'updated_podcast_json1.json')
-    try:
-        with open(updated_path, 'r', encoding='utf-8') as f:
-            updated = json.load(f)    # [ { title, mp3_link, ... }, ... ]
-    except Exception as e:
-        print(f"❌ Error loading updated_podcast_json1.json: {e}")
-        updated = []
+    # 3) Build a map from just the “Podcast 001” part → description
+    desc_by_number = {}
+    for key, desc in summaries.items():
+        # extract “Podcast 001” (everything up to first space after the number)
+        m = re.match(r'^(Podcast\s*\d+)', key)
+        if m:
+            number = m.group(1).strip()
+            # only keep the first if duplicates
+            if number not in desc_by_number:
+                desc_by_number[number] = desc
 
-    # 3) Build combined list
-    talks = []
-    for e in updated:
-        title    = e.get('title','').strip()
-        mp3_link = e.get('mp3_link','').strip()
-        desc     = summaries.get(title, '')
+    # 4) Merge descriptions into each talk record by matching the `number` field
+    for t in talks:
+        num = t.get('number', '').strip()
+        t['description'] = desc_by_number.get(num, "")
 
-        if q and q not in title.lower():
-            continue
+    # 5) Apply search filter
+    q = request.args.get('q', '').strip().lower()
+    if q:
+        talks = [t for t in talks if q in t.get('name', '').lower()]
 
-        talks.append({
-            'title':       title,
-            'description': desc,
-            'mp3_link':    mp3_link
-        })
-
-    # 4) Sort by numeric podcast ID in title
-    def extract_num(t):
-        m = re.search(r'(\d+)', t['title'])
+    # 6) Sort by podcast number
+    def num_key(t):
+        m = re.search(r'(\d+)', t.get('number', ''))
         return int(m.group(1)) if m else float('inf')
-    talks.sort(key=extract_num)
+    talks.sort(key=num_key)
 
-    # 5) Paginate
+    # 7) Paginate
+    page        = int(request.args.get('page', 1))
+    per_page    = 20
     total       = len(talks)
     total_pages = (total + per_page - 1) // per_page
-    start, end  = (page-1)*per_page, page*per_page
-    page_talks  = talks[start:end]
+    start       = (page - 1) * per_page
+    page_talks  = talks[start:start + per_page]
 
+    # 8) Render
     return render_template(
         get_template("mp3"),
         talks       = page_talks,
@@ -440,6 +443,9 @@ def mp3_page():
         total_pages = total_pages,
         query       = q
     )
+
+
+
 
 
 

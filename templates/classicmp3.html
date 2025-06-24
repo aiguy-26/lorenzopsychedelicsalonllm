@@ -168,16 +168,27 @@
     
     <h1>Lorenzo's Archive</h1>
     
-    <div class="talks-container">
-      {% for talk in talks %}
-      <div class="talk">
-        <h2>{{ talk.title }}</h2>
+   <div class="talks-container">
+  {% for talk in talks %}
+    <div class="talk">
+      <h2>{{ talk.name }}</h2>
+      <p>
+        <strong>{{ talk.number }}</strong>
+        &mdash; {{ talk.date }} by {{ talk.speaker }}
+      </p>
+
+      {% if talk.description %}
         <p>{{ talk.description }}</p>
-        <!-- The play button opens the audio player page in a new window -->
-        <button onclick="openAudioInNewWindow('{{ talk.mp3_link if talk.mp3_link else talk.local_mp3_path }}')">Play</button>
-      </div>
-      {% endfor %}
-    </div>S
+      {% endif %}
+
+      <button onclick="openAudioInNewWindow('{{ talk.mp3_link }}')">
+        Play
+      </button>
+    </div>
+  {% endfor %}
+</div>
+
+
     
     <!-- Pagination Controls -->
     <div class="pagination">
