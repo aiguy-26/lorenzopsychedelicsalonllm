@@ -145,7 +145,10 @@ def search_similar_with_hnsw(query, top_k=8, ef=80):
         return "No relevant context found."
 
 # In-memory conversation cache
-conversation_contexts = {}
+# In-memory conversation cache: user_id → chat_id → history list
+from typing import Dict, List
+conversation_contexts: Dict[str, Dict[str, List[Dict[str,str]]]] = {}
+
 
 def call_gpt4o_mini_model(
     prompt,
@@ -162,12 +165,14 @@ def call_gpt4o_mini_model(
         if relevant_context is None:
             relevant_context = search_similar_with_hnsw(prompt)
 
-        # 2️⃣ Ensure chat_id
+        # 2️⃣ Ensure chat_id exists
         if chat_id is None:
             chat_id = str(uuid.uuid4())
 
-        # 3️⃣ Init per-user history
-        history = conversation_contexts.setdefault(user_id, [])
+        # 3️⃣ Init per-user & per-chat history
+        user_histories = conversation_contexts.setdefault(user_id, {})
+        history        = user_histories.setdefault(chat_id, [])
+        # trim to last 10 turns
         if len(history) > 10:
             history[:] = history[-10:]
 
@@ -179,7 +184,6 @@ def call_gpt4o_mini_model(
 
         # 5️⃣ Layer on voice instructions if toggled
         voice_txt = SYSTEM_PROMPTS.get("voice", "")
-
         if voice_mode and voice_txt:
             base = f"{voice_txt.strip()}\n\n{base.strip()}"
 
@@ -201,9 +205,10 @@ def call_gpt4o_mini_model(
         )
         reply = response.choices[0].message.content.strip()
 
-        # 8️⃣ Save to history
+        # 8️⃣ Save back to the correct chat bucket
         history.append({"user": prompt, "assistant": reply})
-        conversation_contexts[user_id] = history
+        user_histories[chat_id] = history
+        conversation_contexts[user_id] = user_histories
 
         return reply, chat_id
 
@@ -211,7 +216,6 @@ def call_gpt4o_mini_model(
         return f"❌ OpenAI API error: {api_err}", chat_id
     except Exception as e:
         return f"❌ An unexpected error occurred: {e}", chat_id
-
 
 # -------------------------
 #   New: Theme Selection
