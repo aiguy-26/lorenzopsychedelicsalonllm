@@ -13,12 +13,18 @@ import psycopg2
 import boto3
 from urllib.parse import quote
 import tempfile
+import soundfile as sf
+from io import BytesIO
+import os
+from PIL import Image
+from openai import OpenAIError
+
 # public GCS bucket (same default you used elsewhere)
 GCS_BUCKET = os.getenv("BUCKET_NAME", "psychedeli_salon_mp3s")
 
 
 # Load PostgreSQL connection URL
-DATABASE_URL = os.getenv("DATABASE_URL")
+DATABASE_URL = 'postgresql://postgres:PJeqquglCYpSoKtcJUrIDASdyhlUvqwD@yamabiko.proxy.rlwy.net:23023/railway'
 
 # Initialize Flask
 app = Flask(__name__, static_folder="static")
@@ -31,6 +37,17 @@ if not os.path.exists(app.config['UPLOAD_FOLDER']):
 # Set your OpenAI key
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 openai.api_key = OPENAI_API_KEY
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+
+PROMPT_PATH = os.path.join(BASE_DIR, "static", "system_prompts.json")
+if not os.path.exists(PROMPT_PATH):
+    raise FileNotFoundError(f"Could not find system_prompt.json at {PROMPT_PATH!r}")
+
+with open(PROMPT_PATH, "r", encoding="utf-8") as f:
+    SYSTEM_PROMPTS = json.load(f)
+
 
 # Initialize SentenceTransformer model for embeddings
 model = SentenceTransformer('all-MiniLM-L6-v2')
@@ -130,61 +147,70 @@ def search_similar_with_hnsw(query, top_k=8, ef=80):
 # In-memory conversation cache
 conversation_contexts = {}
 
-def call_gpt4o_mini_model(prompt, user_id, chat_id=None, relevant_context=None, custom_instructions=""):
+def call_gpt4o_mini_model(
+    prompt,
+    user_id,
+    chat_id=None,
+    relevant_context=None,
+    prompt_type="default",
+    custom_instructions="",
+    voice_mode=False
+):
     """Calls GPT, returns the model's text response along with chat_id."""
     try:
+        # 1️⃣ HNSW lookup for context
         if relevant_context is None:
             relevant_context = search_similar_with_hnsw(prompt)
+
+        # 2️⃣ Ensure chat_id
         if chat_id is None:
             chat_id = str(uuid.uuid4())
 
-        global conversation_contexts
-        if user_id not in conversation_contexts:
-            conversation_contexts[user_id] = []
+        # 3️⃣ Init per-user history
+        history = conversation_contexts.setdefault(user_id, [])
+        if len(history) > 10:
+            history[:] = history[-10:]
 
-        conversation_history = conversation_contexts[user_id]
-        # Keep only the last 10 exchanges
-        if len(conversation_history) > 10:
-            conversation_history = conversation_history[-10:]
-            conversation_contexts[user_id] = conversation_history
+        # 4️⃣ Pick the base system prompt
+        if prompt_type == "custom" and custom_instructions.strip():
+            base = custom_instructions
+        else:
+            base = SYSTEM_PROMPTS.get(prompt_type, SYSTEM_PROMPTS["default"])
 
-        combined_instructions = ('''You are the AI embodiment of the psychedelic salons  ideas and works. You are being fed 
-                                 transcribed snippets from over 700 of ther psychedelis salon's talks and I want you to use the context in the snippets, along with your 
-                                 own knowledge, to answer user's queries. Do not mention the snippets directly. Instead, occasionally quote the speakers in long quotes,
-                                 and speak in a way that appeals to fans of their work. Do not begin your response with repetitive, overly dramatic phrases like "AHH". Please don't fluff up the repsonses.
-                                 Do not use lists unless the user asks for them. Your goal is to deliver mind-blowing responses that unpack complex ideas, challenging cultural and social norms.
-                                 Please speak very articulately, as if you are the speaker themselves—using their style of combining concepts into new, meaningful insights.
-                                 If it helps the user, recommend a talk with a link at the end of your response (using only metadata links from the snippets).
-                                 Make responses long enough to cover the query very well, but not so long as to be burdonsome to read.
-                                 ''')
-        if custom_instructions.strip():
-            combined_instructions += f"\n\nCustom Instructions:\n{custom_instructions}"
+        # 5️⃣ Layer on voice instructions if toggled
+        voice_txt = SYSTEM_PROMPTS.get("voice", "")
 
-        # Always prepend the system message in every call.
-        messages = [{"role": "system", "content": combined_instructions}]
-        # Append any conversation history if exists.
-        for exchange in conversation_history:
-            messages.append({"role": "user", "content": exchange["user"]})
-            messages.append({"role": "assistant", "content": exchange["assistant"]})
-        # Append current query with context.
+        if voice_mode and voice_txt:
+            base = f"{voice_txt.strip()}\n\n{base.strip()}"
+
+        # 6️⃣ Build the message stack
+        messages = [{"role": "system", "content": base}]
+        for ex in history:
+            messages.append({"role": "user",      "content": ex["user"]})
+            messages.append({"role": "assistant", "content": ex["assistant"]})
         messages.append({
             "role": "user",
             "content": f"Context:\n{relevant_context}\n\nPrompt:\n{prompt}"
         })
 
+        # 7️⃣ Call the API
         response = openai.ChatCompletion.create(
             model="gpt-4o-mini",
-            messages=messages
+            messages=messages,
+            temperature=0.8
         )
-        model_response = response['choices'][0]['message']['content'].strip()
-        conversation_history.append({"user": prompt, "assistant": model_response})
-        conversation_contexts[user_id] = conversation_history
-        return model_response, chat_id
+        reply = response.choices[0].message.content.strip()
 
-    except openai.error.OpenAIError as api_err:
-        return f"❌ OpenAI API error: {str(api_err)}", chat_id
+        # 8️⃣ Save to history
+        history.append({"user": prompt, "assistant": reply})
+        conversation_contexts[user_id] = history
+
+        return reply, chat_id
+
+    except OpenAIError as api_err:
+        return f"❌ OpenAI API error: {api_err}", chat_id
     except Exception as e:
-        return f"❌ An unexpected error occurred: {str(e)}", chat_id
+        return f"❌ An unexpected error occurred: {e}", chat_id
 
 
 # -------------------------
@@ -298,6 +324,8 @@ def transcribe_audio_endpoint():
         print("Transcription error:", e)
         return jsonify({"error": str(e)}), 500
 ("After transcription request")
+
+import traceback
 
 @app.route('/get_response', methods=['POST'])
 def get_response():
@@ -423,6 +451,39 @@ def list_chats():
             all_chats.append({"chat_id": str(r[0]), "title": r[1] or "(untitled)", "created_at": created_at})
         print("list_chats for user_id", user_id, "returned:", all_chats)
         return jsonify(all_chats)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+from flask import send_file
+from io import BytesIO
+
+@app.route('/stream_tts', methods=['POST'])
+def stream_tts():
+    try:
+        data = request.get_json()
+        text = data.get("text", "")
+        if not text:
+            return jsonify({"error": "No text provided"}), 400
+
+        voice = data.get("voice", "fable")
+        url = "https://api.openai.com/v1/audio/speech"
+        payload = {
+            "model": "tts-1",
+            "input": text,
+            "voice": voice,
+            "format": "mp3"
+        }
+        headers = {
+            "Authorization": f"Bearer {openai.api_key}",
+            "Content-Type": "application/json"
+        }
+
+        response = requests.post(url, json=payload, headers=headers)
+        if response.status_code != 200:
+            return jsonify({"error": "TTS API failed"}), 500
+
+        return send_file(BytesIO(response.content), mimetype='audio/mpeg')
+
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

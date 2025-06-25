@@ -296,6 +296,7 @@
       left: 50%;
       transform: translate(-50%, -50%);
       background-color: #070706;
+      color : white;
       padding: 25px;
       border-radius: 10px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.3);
@@ -479,30 +480,56 @@
         </div>
         <!-- SIDEBAR TAB -->
         <div class="sidebar-tab" id="sidebar-tab" onclick="toggleSidebar()">&#9776;</div>
-        <!-- FIXED INPUT -->
-        <div class="input-container">
-          <textarea id="user-input" placeholder="Welcome to the Eschaton...."></textarea>
-          <button onclick="sendMessage()">Send</button>
-        </div>
-      </div>
+        ><!-- FIXED INPUT CONTAINER -->
+    <div class="input-container">
+      
+      <textarea id="user-input" placeholder="Greetings, from cyberdelic space…"></textarea>
+      <button onclick="sendMessage()">Send</button>
+      <button id="mic-button">🎤</button>
+    </div>
+  </div>
       <!-- RESOURCE CONTAINER (hidden by default) -->
       <div class="resource-container" id="resource-view" style="display: none;">
         <iframe class="resource-iframe" src="/static/resource.html" title="Resource Page"></iframe>
       </div>
     </div>
   </div>
-  <!-- SETTINGS MODAL -->
-  <div id="custom-instructions-modal">
+  
+  
+
+      <!-- SETTINGS MODAL (hidden by default) -->
+  <div id="custom-instructions-modal" style="display:none;">
     <div class="modal-content">
+      
+
+
+      <!-- Persona Selection -->
+      
+      <h2>Choose a Personality</h2>
+      <select id="settings-prompt-select">
+        <option value="default">Default</option>
+        <option value="Explorer">Explorer</option>
+        <option value="esoteric">Esoteric</option>
+        <option value="scientific">Scientific</option>
+        <option value="friendly">Friendly</option>
+        <option value="custom">Custom</option>
+      </select>
+
+      <!-- Custom Instructions (only used if Persona = Custom) -->
+      
+      <h2>Create a personality</h2>
+      <textarea id="settings-custom-input"
+                placeholder="Enter custom instructions here…"
+                rows="6"></textarea>
       <h2>Settings</h2>
-      <!-- Theme Selection Form -->
+     <!-- Theme Selection -->
       <form id="theme-form" action="/set_theme" method="post">
         <label for="theme-select">Select Theme:</label>
         <select id="theme-select" name="theme">
-          <option value="classic">Terence App 1 (Classic)</option>
-          <option value="psychedelic">Eschaton (Psychedelic)</option>
-          <option value="dark">Plain Dark</option>
-          <option value="light" selected>Plain Light</option>
+          <option value="psychedelic">Psychedelic</option>
+          <option value="classic">Classic</option>
+          <option value="dark">Dark</option>
+          <option value="light">Light</option>
         </select>
         <button type="submit">Save Theme</button>
       </form>
@@ -510,14 +537,15 @@
       <!-- Custom Instructions -->
       <h2>Custom Instructions</h2>
       <textarea id="custom-instructions-input" placeholder="Please speak in the prose and dialogue style of Terence McKenna..." rows="6"></textarea>
-      <div>
-        <button onclick="saveCustomInstructions()">Save Instructions</button>
-        <button onclick="toggleCustomInstructionsModal()">Cancel</button>
+      <div class="modal-actions">
+        <button onclick="saveSettings()">Save</button>
+        <button onclick="toggleSettings()">Cancel</button>
       </div>
     </div>
   </div>
   <script>
     let chat_id = null;
+    let voiceActive = false;
     let customInstructionsText = "";
     if (!localStorage.getItem("user_id")) {
       localStorage.setItem("user_id", crypto.randomUUID());
@@ -536,6 +564,16 @@
       }
     }
 
+    function saveSettings() {
+    const sel = document.getElementById('settings-prompt-select');
+    const ta  = document.getElementById('settings-custom-input');
+    promptType = sel.value;
+    customInstructionsText = ta.value.trim();
+    localStorage.setItem('promptType', promptType);
+    localStorage.setItem('customInstructions', customInstructionsText);
+    alert('Settings saved!');
+    document.getElementById('custom-instructions-modal').style.display = 'none';
+  }
     // Switch between chat view and resource view
     function switchView(view) {
       if (view === 'chat') {
