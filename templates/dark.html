@@ -404,69 +404,105 @@
     <div class="bg-overlay"></div>
     <!-- HEADER -->
     <div class="header-container">
-      <div class="chat-header">TERENCE MCKENNA'S</div>
-      <div class="chat-header">The Eschaton</div>
+      <div class="chat-header">LORENZO'S</div>
+      <div class="chat-header" id="page-title">Psychedelic Salon LLM</div>
       <nav class="nav-menu">
-        <a href="/">Home</a>
-        <a href="/about">About Terence</a>
-        <a href="/mp3">Listen for Yourself</a>
+        <a href="javascript:void(0);" onclick="switchView('chat');">Home</a>
+        <a href="javascript:void(0);" onclick="switchView('resource');">Resources</a>
+        <a href="/mp3">mp3 Archives</a>
+        <a href="https://terenceapp-production.up.railway.app" target="_blank" class="terence-app-link" title="Explore over 300 talks, 400+ hours of mp3, and an AI dedicated to Terence McKenna">Terence App</a>
         <a href="#" onclick="toggleCustomInstructionsModal()">Settings</a>
       </nav>
     </div>
-    <!-- MAIN CONTENT: SIDEBAR + CHAT -->
-    <div class="chat-container">
-      <!-- SIDEBAR (starts collapsed) -->
-      <div class="sidebar collapsed" id="sidebar">
-        <h2>Chat History</h2>
-        <button onclick="startNewChat()">New Chat</button>
-        <ul id="chat-history-list"></ul>
-      </div>
-      <!-- CHAT CONTENT -->
-      <div class="chat-content">
-        <div class="chat-box" id="messages"></div>
-      </div>
-    </div>
-    <!-- SIDEBAR TAB: Always visible inside border-frame -->
-    <div class="sidebar-tab" id="sidebar-tab" onclick="toggleSidebar()">&#9776;</div>
-    <!-- FIXED INPUT CONTAINER -->
+    <!-- MAIN CONTENT: Both CHAT and RESOURCE views -->
+    <div id="main-content">
+      <!-- CHAT CONTAINER (default view) -->
+      <div class="chat-container" id="chat-view">
+        <!-- SIDEBAR -->
+        <div class="sidebar collapsed" id="sidebar">
+          <h2>Chat History</h2>
+          <button onclick="startNewChat()">New Chat</button>
+          <ul id="chat-history-list"></ul>
+        </div>
+        <!-- CHAT CONTENT -->
+        <div class="chat-content">
+          <div class="chat-box" id="messages"></div>
+        </div>
+        <!-- SIDEBAR TAB -->
+        <div class="sidebar-tab" id="sidebar-tab" onclick="toggleSidebar()">&#9776;</div>
+        <!-- FIXED INPUT CONTAINER -->
     <div class="input-container">
-      <textarea id="user-input" placeholder="Welcome to the Eschaton...."></textarea>
+      
+      <textarea id="user-input" placeholder="Greetings, from cyberdelic space…"></textarea>
       <button onclick="sendMessage()">Send</button>
+      <button id="mic-button">🎤</button>
     </div>
   </div>
-  <!-- SETTINGS MODAL (hidden by default) -->
-  <div id="custom-instructions-modal">
+      <!-- RESOURCE CONTAINER (hidden by default) -->
+      <div class="resource-container" id="resource-view" style="display: none;">
+        <iframe class="resource-iframe" src="/static/resource.html" title="Resource Page"></iframe>
+      </div>
+    </div>
+  </div>
+  
+  
+
+      <!-- SETTINGS MODAL (hidden by default) -->
+  <div id="custom-instructions-modal" style="display:none;">
     <div class="modal-content">
+      
+
+
+      <!-- Persona Selection -->
+      
+      <h2>Choose a Personality</h2>
+      <select id="settings-prompt-select">
+        <option value="default">Default</option>
+        <option value="Explorer">Explorer</option>
+        <option value="esoteric">Esoteric</option>
+        <option value="scientific">Scientific</option>
+        <option value="friendly">Friendly</option>
+        <option value="custom">Custom</option>
+      </select>
+
+      <!-- Custom Instructions (only used if Persona = Custom) -->
+      
+      <h2>Create a personality</h2>
+      <textarea id="settings-custom-input"
+                placeholder="Enter custom instructions here…"
+                rows="6"></textarea>
       <h2>Settings</h2>
-      <!-- Theme Selection Form -->
+     <!-- Theme Selection -->
       <form id="theme-form" action="/set_theme" method="post">
         <label for="theme-select">Select Theme:</label>
         <select id="theme-select" name="theme">
-          <option value="whitish">Terence App 1 (Whitish)</option>
-          <option value="purplish">Eschaton Purplish</option>
-          <option value="plain_dark">Plain Dark</option>
-          <option value="plain_light">Plain Light</option>
+          <option value="psychedelic">Psychedelic</option>
+          <option value="classic">Classic</option>
+          <option value="dark">Dark</option>
+          <option value="light">Light</option>
         </select>
         <button type="submit">Save Theme</button>
       </form>
       <hr>
       <!-- Custom Instructions -->
       <h2>Custom Instructions</h2>
-      <textarea id="custom-instructions-input" placeholder="Enter custom instructions here..." rows="6"></textarea>
-      <div>
-        <button onclick="saveCustomInstructions()">Save Instructions</button>
-        <button onclick="toggleCustomInstructionsModal()">Cancel</button>
+      <textarea id="custom-instructions-input" placeholder="Please speak in the prose and dialogue style of Terence McKenna..." rows="6"></textarea>
+      <div class="modal-actions">
+        <button onclick="saveSettings()">Save</button>
+        <button onclick="toggleSettings()">Cancel</button>
       </div>
     </div>
   </div>
   <script>
     let chat_id = null;
+    let voiceActive = false;
     let customInstructionsText = "";
     if (!localStorage.getItem("user_id")) {
       localStorage.setItem("user_id", crypto.randomUUID());
     }
     const user_id = localStorage.getItem("user_id");
 
+    // Toggle sidebar open/close
     function toggleSidebar() {
       const sidebar = document.getElementById('sidebar');
       if (sidebar.classList.contains('collapsed')) {
@@ -478,11 +514,34 @@
       }
     }
 
+    function saveSettings() {
+    const sel = document.getElementById('settings-prompt-select');
+    const ta  = document.getElementById('settings-custom-input');
+    promptType = sel.value;
+    customInstructionsText = ta.value.trim();
+    localStorage.setItem('promptType', promptType);
+    localStorage.setItem('customInstructions', customInstructionsText);
+    alert('Settings saved!');
+    document.getElementById('custom-instructions-modal').style.display = 'none';
+  }
+    // Switch between chat view and resource view
+    function switchView(view) {
+      if (view === 'chat') {
+        document.getElementById('chat-view').style.display = 'flex';
+        document.getElementById('resource-view').style.display = 'none';
+        document.getElementById('page-title').textContent = 'Psychedelic Salon LLM';
+      } else if (view === 'resource') {
+        document.getElementById('chat-view').style.display = 'none';
+        document.getElementById('resource-view').style.display = 'block';
+        document.getElementById('page-title').textContent = 'Resources';
+      }
+    }
+
+    // Toggle settings modal
     function toggleCustomInstructionsModal() {
       const modal = document.getElementById('custom-instructions-modal');
       const textarea = document.getElementById('custom-instructions-input');
       textarea.value = localStorage.getItem('customInstructions') || '';
-      // Set the theme dropdown from cookie
       const themeCookie = document.cookie.split('; ').find(row => row.startsWith('theme='));
       if (themeCookie) {
         document.getElementById('theme-select').value = themeCookie.split('=')[1];
@@ -564,10 +623,10 @@
               messagesContainer.appendChild(msgDiv);
             });
             if (messagesContainer.lastElementChild) {
-              messagesContainer.scrollTop = messagesContainer.lastElementChild.offsetTop;
+              messagesContainer.lastElementChild.scrollIntoView({ behavior: "smooth" });
             }
           } else {
-            messagesContainer.innerHTML = "<p style='color:#ddd; text-align:center;'>No messages yet. Start the conversation!</p>";
+            messagesContainer.innerHTML = "<p style='color:white; text-align:center;'>No messages yet. Start the conversation!</p>";
           }
         })
         .catch(err => console.error("Failed to load chat:", err));
@@ -578,35 +637,58 @@
       document.getElementById("messages").innerHTML = "";
     }
 
-    function sendMessage() {
-      const message = document.getElementById("user-input").value.trim();
-      if (!message) return;
-      const messagesContainer = document.getElementById("messages");
-      const userMessage = document.createElement("div");
-      userMessage.className = "user-message";
-      userMessage.textContent = message;
-      messagesContainer.appendChild(userMessage);
-      document.getElementById("user-input").value = "";
-      fetch("/get_response", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_input: message, chat_id: chat_id, user_id: user_id })
-      })
-        .then(response => response.json())
-        .then(data => {
-          const aiMessage = document.createElement("div");
-          aiMessage.className = "assistant-message";
-          aiMessage.innerHTML = markdownToHTML(data.response || "No response.");
-          messagesContainer.appendChild(aiMessage);
-          if (messagesContainer.lastElementChild) {
-            messagesContainer.scrollTop = messagesContainer.lastElementChild.offsetTop;
-          }
-          if (!chat_id && data.chat_id) {
-            chat_id = data.chat_id;
-          }
-        })
-        .catch(() => console.error("Error sending message."));
+  function sendMessage() {
+  // 1) Get the user’s input
+  const message = document.getElementById("user-input").value.trim();
+  if (!message) return;
+
+  // 2) Echo the user bubble
+  const messagesContainer = document.getElementById("messages");
+  const userMessage = document.createElement("div");
+  userMessage.className = "user-message";
+  userMessage.textContent = message;
+  messagesContainer.appendChild(userMessage);
+
+  // 3) Clear the textarea
+  document.getElementById("user-input").value = "";
+
+  // 4) Send to backend (including voice_mode & prompts)
+  fetch("/get_response", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      user_input:          message,
+      chat_id:             chat_id,
+      user_id:             user_id,
+      voice_mode:          voiceActive,
+      prompt_type:         localStorage.getItem("promptType") || "default",
+      custom_instructions: localStorage.getItem("customInstructions") || ""
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+    // 5) Render the assistant’s reply
+    const aiMessage = document.createElement("div");
+    aiMessage.className = "assistant-message";
+    aiMessage.innerHTML = markdownToHTML(data.response || "No response.");
+    messagesContainer.appendChild(aiMessage);
+    messagesContainer.lastElementChild.scrollIntoView({ behavior: "smooth" });
+
+    // 6) Kick off TTS if voice mode is on
+    if (voiceActive && typeof speakText === "function") {
+      console.log("🗣️ speakText:", data.response);
+      speakText(data.response);
     }
+
+    // 7) Capture new chat_id if needed
+    if (!chat_id && data.chat_id) {
+      chat_id = data.chat_id;
+    }
+  })
+  .catch(err => console.error("Error sending message:", err));
+}
+
+
 
     function markdownToHTML(text) {
       return text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, p1, p2) =>
@@ -623,6 +705,218 @@
         }
       });
     });
+    
+// 1) A global flag you toggle with your mic button
+
+
+// 2) A place to stash our recorder/audio nodes so we can stop & clean up
+let recorderState = {
+  mediaRecorder: null,
+  audioContext: null,
+  processor: null,
+  source: null,
+  stream: null,
+};
+
+// 3) The improved startRecording
+async function startRecording() {
+  if (!voiceActive) return;    // bail if voice mode turned off
+
+  try {
+    console.log("Requesting mic access…");
+    recorderState.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    console.log("Mic access granted.");
+
+    // Web Audio setup for silence detection
+    recorderState.audioContext = new AudioContext();
+    recorderState.source       = recorderState.audioContext.createMediaStreamSource(recorderState.stream);
+    recorderState.processor    = recorderState.audioContext.createScriptProcessor(2048, 1, 1);
+
+    const silenceThreshold  = 0.01;
+    const maxSilentChunks   = 25; // ~1.25s
+    let silentChunks = 0, hasSpoken = false;
+
+    recorderState.processor.onaudioprocess = e => {
+      const input = e.inputBuffer.getChannelData(0);
+      const maxVal = input.reduce((m, v) => Math.max(m, Math.abs(v)), 0);
+
+      if (maxVal > silenceThreshold) {
+        hasSpoken = true;
+        silentChunks = 0;
+      } else if (hasSpoken) {
+        silentChunks++;
+        if (silentChunks > maxSilentChunks) {
+          stopRecorder();   // invokes mediaRecorder.stop()
+        }
+      }
+    };
+
+    recorderState.source.connect(recorderState.processor);
+    recorderState.processor.connect(recorderState.audioContext.destination);
+
+    // MediaRecorder setup
+    recorderState.mediaRecorder = new MediaRecorder(recorderState.stream);
+    const audioChunks = [];
+
+    recorderState.mediaRecorder.ondataavailable = e => {
+      if (e.data.size > 0) audioChunks.push(e.data);
+    };
+
+    recorderState.mediaRecorder.onstop = async () => {
+      console.log("Processing recorded audio…");
+      cleanupAudio();  // tear everything down
+
+      const blob = new Blob(audioChunks, { type: "audio/webm" });
+      const form = new FormData();
+      form.append("audio", blob, "rec.webm");
+
+      let transcript = "";
+      try {
+        const res  = await fetch("/transcribe_audio", { method: "POST", body: form });
+        const json = await res.json();
+        transcript = (json.transcript || "").trim();
+        console.log("Transcription:", transcript);
+      } catch (err) {
+        console.error("Transcription error:", err);
+      }
+
+      if (transcript) {
+        document.getElementById("user-input").value = transcript;
+        sendMessage();    // your existing function that includes voice_mode in the fetch
+      }
+
+      // restart if still active
+      if (voiceActive && transcript) {
+        setTimeout(startRecording, 500);
+      }
+    };
+
+    recorderState.mediaRecorder.start();
+    console.log("Recording started…");
+
+  } catch (err) {
+    console.error("Mic error:", err);
+    alert("Microphone permission is required: " + err.message);
+    cleanupAudio();
+  }
+}
+
+// 4) Helpers to stop & clean up
+function stopRecorder() {
+  if (recorderState.mediaRecorder && recorderState.mediaRecorder.state !== "inactive") {
+    recorderState.mediaRecorder.stop();
+  }
+}
+
+function cleanupAudio() {
+  if (recorderState.processor) {
+    recorderState.processor.disconnect();
+    recorderState.processor.onaudioprocess = null;
+  }
+  if (recorderState.source) {
+    recorderState.source.disconnect();
+  }
+  if (recorderState.audioContext) {
+    recorderState.audioContext.close();
+  }
+  if (recorderState.stream) {
+    recorderState.stream.getTracks().forEach(t => t.stop());
+  }
+  recorderState = { mediaRecorder: null, audioContext: null, processor: null, source: null, stream: null };
+}
+// 5) Toggle mic button listener
+document.addEventListener("DOMContentLoaded", () => {
+  // 1) Load chat history
+  loadChatHistory();
+
+  // 2) Enter = sendMessage
+  document.getElementById("user-input").addEventListener("keydown", function(e) {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+
+  // 3) Bind the mic button
+  const micBtn = document.getElementById("mic-button");
+  if (!micBtn) {
+    console.error("❌ #mic-button not found!");
+    return;
+  }
+  console.log("✅ mic-button found, binding click…");
+
+  micBtn.addEventListener("click", () => {
+    console.log("🎤 mic-button clicked; voiceActive was", voiceActive);
+    voiceActive = !voiceActive;
+    micBtn.classList.toggle("active", voiceActive);
+
+    if (voiceActive) {
+      console.log("—> voiceActive=true; starting recording");
+      startRecording();
+    } else {
+      console.log("—> voiceActive=false; stopping recording");
+      stopRecorder();
+    }
+  });
+});
+
+async function speakText(text) {
+  try {
+    // **Pause recording while speaking**
+    if (voiceActive && typeof stopRecorder === "function") {
+      stopRecorder();
+      console.log("⏸️ Mic paused for TTS");
+    }
+
+    const cleaned = text
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$1')
+      .replace(/https?:\/\/\S+/g, '')
+      .replace(/\b(\w+)\b\s*(\1\s*)+/gi, '$1');
+
+    const sentences = cleaned.match(/[^.!?]+[.!?]+/g) || [cleaned];
+    if (!sentences.length) return;
+
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+
+    // Fetch & decode in parallel
+    const bufferPromises = sentences.map(async sentence => {
+      const res = await fetch(`/stream_tts?nocache=${Date.now()}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: sentence.trim(), voice: "onyx", model: "tts-1-hd" })
+      });
+      if (!res.ok) throw new Error(`TTS error ${res.status}`);
+      const data = await res.blob().then(b => b.arrayBuffer());
+      return ctx.decodeAudioData(data);
+    });
+
+    // Play each buffer as soon as it’s ready
+    for (const bufPromise of bufferPromises) {
+      const buffer = await bufPromise;
+      await new Promise(res => {
+        const src = ctx.createBufferSource();
+        src.buffer = buffer;
+        src.playbackRate.value = 1.1;
+        src.connect(ctx.destination);
+        src.onended = res;
+        src.start();
+      });
+    }
+
+    // **Resume recording after speaking**
+    console.log("▶️ TTS finished, restarting mic if active…");
+    if (voiceActive && typeof startRecording === "function") {
+      startRecording();
+    }
+
+  } catch (err) {
+    console.error("speakText error:", err);
+  }
+}
+
+
+
+
   </script>
 </body>
 </html>
