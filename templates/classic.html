@@ -18,9 +18,11 @@
       background-color: black;
       overflow-x: hidden;
       font-family: sans-serif;
+      font-family: 'Inter', sans-serif;
+      line-height: 1.25;
     }
     /* OUTER FRAME */
-    .border-frame {
+   .border-frame {
   position: relative;
   display: flex;
   flex-direction: column;
@@ -29,15 +31,17 @@
   max-width: 1776px;
   max-height: 1000px;
   border-radius: 25px;
- 
+
+  /* one shorthand for URL, position, repeat, and size */
+  background: 
+    url("/static/lozo_pic.png")      /* the image */
+    no-repeat                         /* don’t tile */
+    90% center                        /* 90% from left (further right), vertically centered */
+    / 35% auto;                       /* 20% width of container, auto height */
+
   margin: auto;
-  background: url("/static/salonpic3.png") center center / cover no-repeat;
-  /* background-attachment: fixed; */
   overflow: hidden;
   scrollbar-width: none;
-  background-size: 90%;
-  background-position: center bottom;
-  background-repeat: no-repeat;
 }
 
     .border-frame::-webkit-scrollbar {
@@ -117,20 +121,48 @@
   min-height: 0;
 }
 
-/* CHAT CONTENT (if not already set) */
-.chat-content {
-  margin-left: 195px;
-  flex: 1 1 auto;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  border-radius: 0 20px 20px 0;
-  overflow: hidden;
-  position: relative;
-  z-index: 1;
-  min-height: 0;
+.chat-content::before {
+  content: "";
+  position: absolute;
+  top: 45%;                 /* lift him up a bit */
+  left: 50%;
+  width: 70%;               /* slightly bigger */
+  max-width: 500px;         /* raise the cap too */
+  aspect-ratio: 1 / 1.2;
+
+  transform: translate(-50%, -50%);
+  opacity: 0.15;
+  pointer-events: none;
+  z-index: 0;
 }
 
+
+.chat-content {
+  position: relative;
+  /* existing styles… */
+}
+
+/* New: Lorenzo’s portrait as a subtle background in the chat panel */
+.chat-content::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 60%;              /* adjust this % until it “feels” right */
+  height: auto;
+  max-width: 400px;        /* optional cap */
+  aspect-ratio: 1 / 1.2;   /* lock portrait aspect if you like */
+  
+  transform: translate(-50%, -50%);
+  opacity: 0.15;           /* fade way into the background */
+  pointer-events: none;    /* let clicks through to the chat */
+  z-index: 0;
+}
+
+/* And bump all chat‐bubble z‐indices above it */
+.chat-box, .input-container, .sidebar, .header-container {
+  z-index: 1;
+}
 
     /* SIDEBAR */
     .sidebar {
@@ -220,7 +252,7 @@
     /* FIXED INPUT CONTAINER */
     .input-container {
       position: absolute;
-      bottom: 0;
+      bottom: 10px;
       left: 200px;
       right: 0;
       height: 50px;
@@ -461,7 +493,7 @@
         <a href="javascript:void(0);" onclick="switchView('chat');">Home</a>
         <a href="javascript:void(0);" onclick="switchView('resource');">Resources</a>
         <a href="/mp3">mp3 Archives</a>
-        <a href="https://terenceapp-production.up.railway.app" target="_blank" class="terence-app-link" title="Explore over 300 talks, 400+ hours of mp3, and an AI dedicated to Terence McKenna">Terence App</a>
+        <a href="https://terence2-production.up.railway.app" target="_blank" class="terence-app-link" title="Explore over 300 talks, 400+ hours of mp3, and an AI dedicated to Terence McKenna">Terence App</a>
         <a href="#" onclick="toggleCustomInstructionsModal()">Settings</a>
       </nav>
     </div>
@@ -523,7 +555,7 @@
                 placeholder="Enter custom instructions here…"
                 rows="6"></textarea>
       <h2>Settings</h2>
-     <!-- Theme Selection -->
+     <!-- Theme Selection 
       <form id="theme-form" action="/set_theme" method="post">
         <label for="theme-select">Select Theme:</label>
         <select id="theme-select" name="theme">
@@ -534,7 +566,7 @@
         </select>
         <button type="submit">Save Theme</button>
       </form>
-      <hr>
+      <hr>-->
       <!-- Custom Instructions -->
       <h2>Custom Instructions</h2>
       <textarea id="custom-instructions-input" placeholder="Please speak in the prose and dialogue style of Terence McKenna..." rows="6"></textarea>
